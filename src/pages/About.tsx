@@ -1,11 +1,40 @@
 // src/pages/About.tsx
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 const About = () => {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">About Me</h1>
-        <p>Details about your background and experience...</p>
-      </div>
-    )
-  }
-  
-  export default About
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Handle page refresh
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+
+    // Handle page visibility change with navigation
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        console.log('Page refresh detected')
+        navigate('/')
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [navigate])
+
+  return (
+    <div className="space-y-6">
+      {/* ... rest of your component */}
+    </div>
+  )
+}
+
+export default About
