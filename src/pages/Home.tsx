@@ -2,6 +2,7 @@
 import { motion } from "framer-motion"
 import { cn } from "../utils/classes"
 import { GradualSpacing } from "../components/shared/spacing"
+import thisImage from "../assets/me.jpeg"
 
 const Home = () => {
     return (
@@ -48,7 +49,7 @@ const Home = () => {
   </div>
 </div>
             <img
-              src="/me.jpeg"
+              src={thisImage}
               alt="Profile"
               className="w-full h-auto object-cover rounded-full"
             />
@@ -104,6 +105,7 @@ const Home = () => {
       "Git",
       "SQL",
       "AWS"
+
     ].map((skill) => (
       <motion.div
         key={skill}
