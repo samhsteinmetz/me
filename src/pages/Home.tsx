@@ -54,7 +54,6 @@ const Home = () => {
               className="w-full h-auto object-cover rounded-full"
             />
         </motion.section>
-        // Add these sections in Home.tsx after About section and before Projects
 
 {/* Education Section */}
 {/* Education Section */}
