@@ -10,13 +10,14 @@ const About = () => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault()
       e.returnValue = ''
+      navigate('/me')
     }
 
     // Handle page visibility change with navigation
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         console.log('Page refresh detected')
-        navigate('/')
+        navigate('/me')
       }
     }
 
@@ -33,6 +34,7 @@ const About = () => {
   return (
     <div className="space-y-6">
       {/* ... rest of your component */}
+      hi
     </div>
   )
 }
