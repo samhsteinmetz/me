@@ -7,22 +7,9 @@
     <title>Vite + React + TS</title>
     <script>
       // Store the attempted path
-      const path = window.location.pathname;
-      // Check if it's not already /me
-      if (!path.includes('/me')) {
-        // Store original path for later
-        sessionStorage.setItem('originalPath', path);
-        // Redirect to /me
-        window.location.replace('/me');
-      }
       // After page loads, check if we need to navigate
       window.onload = function() {
-        const originalPath = sessionStorage.getItem('originalPath');
-        if (originalPath) {
-          sessionStorage.removeItem('originalPath');
-          // Use client-side routing to navigate
-          window.history.replaceState(null, '', originalPath);
-        }
+        window.location.assign("https://samhsteinmetz.github.io/me");
       }
     </script>
     <script type="module" crossorigin src="https://samhsteinmetz.github.io/me/assets/index-DsvRTPaE.js"></script>
