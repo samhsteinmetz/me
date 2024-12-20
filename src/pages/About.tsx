@@ -36,7 +36,7 @@ const About = () => {
     <>
       <div className="flex flex-col items-center">
         <div className="max-w-2xl mx-auto text-center space-y-6 mb-16">
-          <h1 className="text-4xl font-bold text-green-400 py-8">About Me</h1>
+          <h1 className="text-5xl font-bold text-green-400 py-8">About Me</h1>
           <div style={{ padding: '2rem' }}>
             <GradientParagraph 
                 text={longText} 
@@ -70,7 +70,7 @@ const About = () => {
                   fontWeight="bold"
                   style={{ textDecoration: 'underline', textDecorationColor: 'purple' }}
                 >
-                  SHS
+                  Socials
                 </text>
               </svg>
             </div>

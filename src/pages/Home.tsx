@@ -3,8 +3,19 @@ import { motion } from "framer-motion"
 import { cn } from "../utils/classes"
 import { GradualSpacing } from "../components/shared/spacing"
 import thisImage from "../assets/me.jpeg"
+import Card from "../components/ProjectCard";
 
 const Home = () => {
+    const projects = ["StackOverFlow",  "HackBeanpot", "TeamJobs", "Twitter Asks"];
+    const colors = [
+        '#3498db', // Blue
+        '#9b59b6', // Purple
+        '#e74c3c', // Red
+        '#f39c12', // Orange
+        '#2ecc71', // Green
+        '#1abc9c'  // Teal
+      ];
+      
     return (
         <div className="py-12 px-8">
       <div className={cn("flex flex-col gap-16 w-full", "px-8 sm:px-8 lg:px-6")}>
@@ -124,29 +135,23 @@ const Home = () => {
   
         {/* Projects Preview */}
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-8 w-full"
-        >
-          <h2 className="text-3xl font-bold text-center">Featured Projects</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <motion.div
-                key={i}
-                whileHover={{ y: -5 }}
-                className={cn(
-                  "p-6 rounded-lg",
-                  "border border-green-500/20",
-                  "backdrop-blur-sm bg-black/30"
-                )}
-              >
-                <h3 className="text-xl font-bold mb-2">Project {i}</h3>
-                <p>Project description...</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className="space-y-8 w-full"
+>
+  <h2 className="text-3xl font-bold text-center">Featured Projects</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {projects.map((project, index) => (
+      <Card 
+        key={project} 
+        title={project} 
+        para="" 
+        baseColor={colors[index % colors.length]} 
+      />
+    ))}
+  </div>
+</motion.section>
   
         {/* Contact CTA */}
         <motion.section
