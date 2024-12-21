@@ -1,5 +1,6 @@
 // src/pages/Contact.tsx
 import { useState, FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -7,16 +8,23 @@ const Contact = () => {
     email: '',
     message: ''
   })
+  const navigate = useNavigate();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     // Add form submission logic here
     console.log('Form submitted:', formData)
+    if(formData.name && formData.email && formData.message) {
+      alert('Form submitted successfully!')
+    }
+    if(formData.name === 'addy') {
+        navigate('/other')
+    }
   }
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-4xl font-bold mb-8">Get in Touch</h1>
+      <h1 className="text-4xl font-bold mb-8">Get in Touch With Me!</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
