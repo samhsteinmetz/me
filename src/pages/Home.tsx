@@ -4,8 +4,10 @@ import { cn } from "../utils/classes"
 import { GradualSpacing } from "../components/shared/spacing"
 import thisImage from "../assets/me.jpeg"
 import Card from "../components/ProjectCard";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+    const navigate = useNavigate();
     const projects = ["StackOverFlow",  "HackBeanpot", "TeamJobs", "Twitter Asks"];
     const colors = [
         '#3498db', // Blue
@@ -114,7 +116,8 @@ const Home = () => {
       "Python",
       "Git",
       "SQL",
-      "AWS"
+      "JAVA",
+      "C/C++",
 
     ].map((skill) => (
       <motion.div
@@ -152,6 +155,112 @@ const Home = () => {
     ))}
   </div>
 </motion.section>
+
+{/* Software Experience Section */}
+<motion.section
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className={cn(
+    "w-full",
+    "p-6 rounded-lg",
+    "border-2 border-green-500/20",
+    "backdrop-blur-sm bg-black/30",
+    "hover:border-green-500/40 transition-colors"
+  )}
+>
+  <h2 className="text-3xl font-bold mb-6 text-green-400">Software Experience</h2>
+  <div className="space-y-8">
+    {/* Teaching Assistant */}
+    <div>
+      <div className="border-l-2 border-red-500/40 pl-4">
+        <h3 className="text-xl font-semibold text-red-500">Teaching Assistant - Object-Oriented Development</h3>
+        <p className="text-lg text-white">Northeastern University | Part-time + Full-time</p>
+        <p className="text-sm text-white/80">Sep 2024 – Dec 2024</p>
+      </div>
+      <ul className="list-disc pl-8 text-white/80">
+        <li>Led lab sessions on design patterns, reinforcing concepts like abstraction, modularity, code reuse, and agile programming.</li>
+        <li>Graded assignments with a focus on design patterns, inheritance, encapsulation, and ensuring clean Java code.</li>
+        <li>Assisted students during office hours with JUnit, Java, design patterns, and debugging.</li>
+      </ul>
+    </div>
+
+    {/* CX Co-op */}
+    <div>
+      <div className="border-l-2 border-blue-500/40 pl-4">
+        <h3 className="text-xl font-semibold text-blue-500">CX Co-op: Technical Support Engineer and IT Intern</h3>
+        <p className="text-lg text-white">Panorama Education | Hybrid</p>
+        <p className="text-sm text-white/80">Jan 2024 – Dec 2024</p>
+      </div>
+      <ul className="list-disc pl-8 text-white/80">
+        <li>Resolved a queue of 10,000+ customer-facing issues by troubleshooting incidents and addressing user inquiries.</li>
+        <li>Collaborated with UX and Engineering teams to audit and improve platform usability and functionality.</li>
+        <li>Implemented survey auditing solutions and ensured secure, efficient data transfers for hundreds of clients.</li>
+        <li>Conducted a comprehensive audit of 30+ product education resources to ensure quality UX.</li>
+      </ul>
+    </div>
+
+    {/* Software Developer */}
+    <div>
+      <div className="border-l-2 border-teal-500/40 pl-4">
+        <h3 className="text-xl font-semibold text-teal-500">Software Developer Co-op</h3>
+        <p className="text-lg text-white">MHCPS | Full-time</p>
+        <p className="text-sm text-white/80">Jan 2025 – Jun 2025</p>
+      </div>
+      <ul className="list-disc pl-8 text-white/80">
+        <li>Collaborating with cross-functional teams to design and implement scalable software solutions.</li>
+        <li>Working on backend services to improve system performance and reliability.</li>
+        <li>Ensuring secure data processing and handling through best practices and modern frameworks.</li>
+      </ul>
+    </div>
+  </div>
+</motion.section>
+
+{/* General Work Experience Section */}
+<motion.section
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className={cn(
+    "w-full",
+    "p-6 rounded-lg",
+    "border-2 border-green-500/20",
+    "backdrop-blur-sm bg-black/30",
+    "hover:border-green-500/40 transition-colors"
+  )}
+>
+  <h2 className="text-3xl font-bold mb-6 text-green-400">General Work Experience</h2>
+  <div className="space-y-8">
+    {/* Barista */}
+    <div>
+      <div className="border-l-2 border-orange-500/40 pl-4">
+        <h3 className="text-xl font-semibold text-orange-500">Barista</h3>
+        <p className="text-lg text-white">Pure Raw Juice | Part-time</p>
+        <p className="text-sm text-white/80">Jun 2022 – Jan 2023 (8 months)</p>
+      </div>
+      <ul className="list-disc pl-8 text-white/80">
+        <li>Blended smoothies and bowls using a variety of fruits, vegetables, and superfoods.</li>
+        <li>Prepared cold-pressed coffee and cashew milk, ensuring high-quality standards.</li>
+        <li>Safely handled food and managed customer service at the register.</li>
+      </ul>
+    </div>
+
+    {/* Data Operation Intern */}
+    <div>
+      <div className="border-l-2 border-red-500/40 pl-4">
+        <h3 className="text-xl font-semibold text-red-500">Data Operation Intern</h3>
+        <p className="text-lg text-white">Deli Brands of America | Internship</p>
+        <p className="text-sm text-white/80">Jul 2021 – Aug 2021 (2 months)</p>
+      </div>
+      <ul className="list-disc pl-8 text-white/80">
+        <li>Collected time data for meat-packing production operations.</li>
+        <li>Analyzed ERP system data to make it accessible for research and development.</li>
+      </ul>
+    </div>
+  </div>
+</motion.section>
+
+
   
         {/* Contact CTA */}
         <motion.section
@@ -165,7 +274,6 @@ const Home = () => {
           )}
         >
           <h2 className="text-3xl font-bold">Let's Connect</h2>
-          <p className="text-lg">Ready to collaborate?</p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -174,6 +282,7 @@ const Home = () => {
               "bg-green-500 text-black",
               "hover:bg-green-400 transition-colors"
             )}
+            onClick={() => {navigate('/contact')}}
           >
             Get in Touch
           </motion.button>

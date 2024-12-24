@@ -5,7 +5,7 @@ import GradientParagraph from '../components/GradientParagraph.tsx';
 
 const About = () => {
   const navigate = useNavigate()
-  const longText = " Hello! I'm Samuel Heron Steinmetz (SHS). I have a passion for software development, technology, and creating meaningful user experiences. With a background in modern web technologies, I'm constantly exploring new tools and techniques to refine my craft and bring ideas to life.";
+  const longText = " Hello! I'm Samuel Heron Steinmetz (SHS). I have a passion for software development, Math, and everything technology. I am a 3rd year student at Northeastern University, and I am currently pursuing a BS in CS + Finance. I am looking for an internship as of now for summer 2025.";
 
   useEffect(() => {
     // Handle page refresh
