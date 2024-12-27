@@ -94,7 +94,7 @@ const Home = () => {
     <div className="border-l-2 border-blue-500/40 pl-4">
       <h3 className="text-xl font-semibold text-blue-500">Gilman School</h3>
       <p className="text-lg text-white">Highschool</p>
-      <p className="text-sm text-white/80">2022 - 2026</p>
+      <p className="text-sm text-white/80">2018 - 2022</p>
     </div>
   </div>
 </motion.section>
