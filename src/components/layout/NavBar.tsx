@@ -17,16 +17,16 @@ const NavBar = () => {
             </div>
           </Link>
           <div className="flex gap-6">
-            <Link to="/me" className="hover:text-green-400 transition-colors">
+            <Link to="/me" className="text-[#858BF9] font-bold hover:text-green-400 transition-colors">
               Home
             </Link>
-            <Link to="/about" className="hover:text-green-400 transition-colors">
+            <Link to="/about" className="text-[#858BF9] font-bold hover:text-green-400 transition-colors">
               About
             </Link>
-            <Link to="/projects" className="hover:text-green-400 transition-colors">
+            <Link to="/projects" className="text-[#858BF9] font-bold hover:text-green-400 transition-colors">
               Projects
             </Link>
-            <Link to="/contact" className="hover:text-green-400 transition-colors">
+            <Link to="/contact" className="text-[#858BF9] font-bold hover:text-green-400 transition-colors">
               Contact
             </Link>
           </div>

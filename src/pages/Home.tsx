@@ -69,36 +69,6 @@ const Home = () => {
         </motion.section>
 
 {/* Education Section */}
-{/* Education Section */}
-<motion.section
-  initial={{ opacity: 0, x: 20 }}
-  whileInView={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.6 }}
-  className={cn(
-    "w-full",
-    "p-6 rounded-lg",
-    "border-2 border-green-500/20", // Changed to green border
-    "backdrop-blur-sm bg-black/30",
-    "hover:border-green-500/40 transition-colors" // Changed hover to green
-  )}
->
-  <h2 className="text-3xl font-bold mb-6 text-green-400">Education</h2>
-  <div className="space-y-4">
-    <div className="border-l-2 border-[#D41B2C]/40 pl-4">
-      <h3 className="text-xl font-semibold text-[#D41B2C]">Northeastern University</h3>
-      <p className="text-lg text-white">Bachelor of Science in Computer Science and Finance + minor in Math</p>
-      <p className="text-sm text-white/80">2022 - 2026</p>
-    </div>
-  </div>
-  <div className="space-y-4">
-    <div className="border-l-2 border-blue-500/40 pl-4">
-      <h3 className="text-xl font-semibold text-blue-500">Gilman School</h3>
-      <p className="text-lg text-white">Highschool</p>
-      <p className="text-sm text-white/80">2018 - 2022</p>
-    </div>
-  </div>
-</motion.section>
-
 {/* Skills Section */}
 <motion.section
   initial={{ opacity: 0, y: 20 }}
@@ -189,7 +159,7 @@ const Home = () => {
     <div>
       <div className="border-l-2 border-blue-500/40 pl-4">
         <h3 className="text-xl font-semibold text-blue-500">CX Co-op: Technical Support Engineer and IT Intern</h3>
-        <p className="text-lg text-white">Panorama Education | Hybrid</p>
+        <p className="text-lg text-white">Panorama Education | Fulltime Internship</p>
         <p className="text-sm text-white/80">Jan 2024 – Dec 2024</p>
       </div>
       <ul className="list-disc pl-8 text-white/80">
@@ -204,17 +174,48 @@ const Home = () => {
     <div>
       <div className="border-l-2 border-teal-500/40 pl-4">
         <h3 className="text-xl font-semibold text-teal-500">Software Developer Co-op</h3>
-        <p className="text-lg text-white">MHCPS | Full-time</p>
-        <p className="text-sm text-white/80">Jan 2025 – Jun 2025</p>
+        <p className="text-lg text-white">MHCPS | Full-time Internship</p>
+        <p className="text-sm text-white/80">Jan 2025 – May 2025</p>
       </div>
       <ul className="list-disc pl-8 text-white/80">
-        <li>Collaborating with cross-functional teams to design and implement scalable software solutions.</li>
-        <li>Working on backend services to improve system performance and reliability.</li>
-        <li>Ensuring secure data processing and handling through best practices and modern frameworks.</li>
+        <li>working on developing a campus wide parking application and internal tool using id badges</li>
+        <li>deploying and moving microservices from hosted servers to azure cloud</li>
+        <li>team development of a streamlined document and transcript generating application using ellucian colleague database</li>
       </ul>
     </div>
   </div>
 </motion.section>
+
+{/* Education Section */}
+<motion.section
+  initial={{ opacity: 0, x: 20 }}
+  whileInView={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6 }}
+  className={cn(
+    "w-full",
+    "p-6 rounded-lg",
+    "border-2 border-green-500/20", // Changed to green border
+    "backdrop-blur-sm bg-black/30",
+    "hover:border-green-500/40 transition-colors" // Changed hover to green
+  )}
+>
+  <h2 className="text-3xl font-bold mb-6 text-green-400">Education</h2>
+  <div className="space-y-4">
+    <div className="border-l-2 border-[#D41B2C]/40 pl-4">
+      <h3 className="text-xl font-semibold text-[#D41B2C]">Northeastern University</h3>
+      <p className="text-lg text-white">Bachelor of Science in Computer Science and Finance + minor in Math</p>
+      <p className="text-sm text-white/80">2022 - 2026</p>
+    </div>
+  </div>
+  <div className="space-y-4">
+    <div className="border-l-2 border-blue-500/40 pl-4">
+      <h3 className="text-xl font-semibold text-blue-500">Gilman School</h3>
+      <p className="text-lg text-white">Highschool</p>
+      <p className="text-sm text-white/80">2018 - 2022</p>
+    </div>
+  </div>
+</motion.section>
+
 
 {/* General Work Experience Section */}
 <motion.section

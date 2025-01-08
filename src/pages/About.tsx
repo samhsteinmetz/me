@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import GradientParagraph from '../components/GradientParagraph.tsx';
+import currImage from '../assets/headshot.jpeg';
 
 const About = () => {
   const navigate = useNavigate()
@@ -43,14 +44,23 @@ const About = () => {
                 baseColor="green" 
                 longTextThreshold={30} // animate if over 30 chars
             />
+    <div className="flex py-8 justify-center items-center">
+    <img
+          src={currImage
+          }
+          alt="Samuel Heron Steinmetz"
+          className="rounded-full w-80 h-80"
+        ></img>
+        </div>
+
     </div>
+    
           <p className="text-green-300 leading-relaxed">
-            In my free time, I enjoy contributing to open-source projects, learning about new 
-            design patterns, and staying up-to-date with industry trends. My goal is to build 
-            intuitive, efficient, and accessible applications that not only solve problems but 
-            delight users.
+            In my free time, I enjoy contributing to open-source projects, I love coding new projects and competing in hackathons. I am a very ambitious person with definitley a large apetite for learning. I would consider myself more of a back end and lower level developer, even though some of my recent projects have been working web dev. I am always looking for new oppurtunities to learn about new markets and more areas where technology applies. feel free to reach out, connect, follow, even like and subscribe to my socials below.
           </p>
         </div>
+
+      
 
         {/* Animation box and icons at the bottom */}
         <div className="px-16 pb-8">
