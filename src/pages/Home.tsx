@@ -5,10 +5,16 @@ import { GradualSpacing } from "../components/shared/spacing"
 import thisImage from "../assets/me.jpeg"
 import Card from "../components/ProjectCard";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { useEffect, useState } from "react";
 
 const Home = () => {
+  
+
     const navigate = useNavigate();
     const projects = ["StackOverFlow",  "HackBeanpot", "TeamJobs", "Twitter Asks"];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [ipAddress, setIpAddress] = useState<string>("");
     const colors = [
         '#3498db', // Blue
         '#9b59b6', // Purple
@@ -17,6 +23,48 @@ const Home = () => {
         '#2ecc71', // Green
         '#1abc9c'  // Teal
       ];
+
+      useEffect(() => {
+        const fetchIpAddress = async () => {
+          try {
+            // Using ipify to fetch IP address
+            const response = await axios.get("https://api.ipify.org?format=json");
+            setIpAddress(response.data.ip);
+            try {
+              const response = await fetch(
+                "https://673dfa030118dbfe86099e55.mockapi.io/resume/v1/expereince",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ ip: ipAddress, date: new Date().toISOString()}),
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error("Failed to submit form");
+              }
+
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const result = await response.json();
+              
+
+
+
+
+            } catch (error) {
+              console.error("Error submitting form:", error);
+            }
+            console.log(ipAddress);
+          } catch (error) {
+            console.error("Error fetching address:", error);
+          }
+        };
+    
+        fetchIpAddress();
+      },);
+    
       
     return (
         <div className="py-12 px-8">
