@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import GradientParagraph from '../components/GradientParagraph.tsx';
-import currImage from '../assets/headshot.jpeg';
+import currImage from '../assets/cat.jpeg';
 
 const About = () => {
   const navigate = useNavigate()
@@ -46,17 +46,16 @@ const About = () => {
             />
     <div className="flex py-8 justify-center items-center">
     <img
-          src={currImage
-          }
-          alt="Samuel Heron Steinmetz"
-          className="rounded-full w-80 h-80"
-        ></img>
+  src={currImage}
+  alt="Samuel Heron Steinmetz"
+  className="rounded-full w-160 h-160 object-contain"
+/>
         </div>
 
     </div>
     
           <p className="text-green-300 leading-relaxed">
-            In my free time, I enjoy contributing to open-source projects, I love coding new projects and competing in hackathons. I am a very ambitious person with definitley a large apetite for learning. I would consider myself more of a back end and lower level developer, even though some of my recent projects have been working web dev. I am always looking for new oppurtunities to learn about new markets and more areas where technology applies. feel free to reach out, connect, follow, even like and subscribe to my socials below.
+          In my free time I like hanging out with my cats, running, playing basketball, poker, and trying new food! You can always find me in the my school’s sauna in the winter time and hopefully on the beach or at least in the sun in summer time. I have been learning how to ski and would consider myself pretty decent. Besides my hobbies, I do enjoy programming and taking on projects. Although some of my personal projects can be left unfinished, I just say that I am very passionate about the next thing. Recently I have been reading alot about Model Context Protocol and how applications can write themselves somewhat. If you have any questions or want to chat about anything shoot my socials below!
           </p>
         </div>
 
