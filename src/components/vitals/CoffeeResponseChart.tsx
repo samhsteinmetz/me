@@ -15,7 +15,7 @@ import {
 import { curveSummary, type ResponseCurve } from "./analysis";
 
 const INK = "#1A1916";
-const ACCENT = "#2C4A6E";
+const ACCENT = "#C0392B"; // heart-rate response — warm red (matches HR line)
 const MUTED = "#6B6860";
 
 const tick = {

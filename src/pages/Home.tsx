@@ -1,7 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
 import meImage from "../assets/me.jpeg";
-import groupImage from "../assets/group.jpeg";
 import catImage from "../assets/cat.jpeg";
 
 const Home = () => {
@@ -42,7 +40,7 @@ const Home = () => {
               TypeScript or Python.
             </p>
           </div>
-          <figure className="mt-6 md:mt-1 md:w-44 md:flex-shrink-0">
+          <figure className="mt-6 md:mt-1 md:w-64 md:flex-shrink-0">
             <span className="photo-frame">
               <img
                 src={meImage}
@@ -64,62 +62,6 @@ const Home = () => {
             applications get written.
           </li>
         </ul>
-      </section>
-
-      <hr />
-
-      {/* ----- Selected work --------------------------------------------- */}
-      <section aria-labelledby="selected-work-heading">
-        <h2
-          id="selected-work-heading"
-          className="font-serif text-h2 font-medium text-balance"
-        >
-          Selected work
-        </h2>
-
-        <div className="mt-8 space-y-12">
-          <article>
-            <h3 className="font-sans text-h3 font-semibold">DiscountBytes</h3>
-            <p className="mt-2 text-pretty">
-              Co-built a restaurant menu that prices itself: foot-traffic
-              cameras feed a vision model, the model feeds the menu, the menu
-              re-prints with new numbers. Won MLH and HackBeanPot awards.
-            </p>
-            <figure className="mt-5">
-              <span className="photo-frame max-w-md">
-                <img
-                  src={groupImage}
-                  alt="The HackBeanPot 2024 team at the closing ceremony."
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-              <figcaption className="mt-2 font-mono text-mono text-ink-soft">
-                The team at HackBeanPot 2024.
-              </figcaption>
-            </figure>
-            <p className="mt-4 font-mono text-mono text-ink-soft">
-              2024 &middot; Python, Flask, React, Firebase &middot; team of 4
-            </p>
-          </article>
-
-          <article>
-            <h3 className="font-sans text-h3 font-semibold">Twitter Asks</h3>
-            <p className="mt-2 text-pretty">
-              A pipeline that pulled questions out of Twitter and answered them
-              with a fine-tuned GPT. Threaded responses generated async so the
-              page didn&rsquo;t block while the model thought. Built in 36
-              hours; first place at the Whitehall Hackathon.
-            </p>
-            <p className="mt-3 font-mono text-mono text-ink-soft">
-              2023 &middot; Python, Flask, Tweepy, OpenAI &middot; team of 4
-            </p>
-          </article>
-        </div>
-
-        <p className="mt-10">
-          <Link to="/projects">more on the projects page &rarr;</Link>
-        </p>
       </section>
 
       <hr />

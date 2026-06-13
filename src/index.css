@@ -55,6 +55,11 @@
   --color-rule-faint: #e5e6e8;
   --color-accent: #3f5a82;
   --color-accent-soft: rgba(63, 90, 130, 0.12);
+  /* Warm secondary accent — the "highlighter" pop. Used sparingly (list
+     markers, photo frames) and matches the red HR line in the vitals charts. */
+  --color-warm: #c0392b;
+  --color-warm-soft: rgba(192, 57, 43, 0.12);
+  --color-rule-warm: #dcc8c3;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -156,9 +161,9 @@
     }
   }
 
-  /* Notebook photo frame: 1px ruled border, small padding, no radius */
+  /* Notebook photo frame: 1px ruled border (warm-tinted), small padding */
   .photo-frame {
-    border: 1px solid var(--color-rule);
+    border: 1px solid var(--color-rule-warm);
     padding: 0.5rem;
     background: var(--color-paper);
     display: inline-block;
@@ -237,7 +242,7 @@
     content: "—";
     position: absolute;
     left: 0;
-    color: var(--color-ink-soft);
+    color: var(--color-warm);
     font-feature-settings: "tnum" 1;
   }
   .list-notebook > li + li {

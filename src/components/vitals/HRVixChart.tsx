@@ -1,4 +1,4 @@
-// HRVixChart — resting HR (ink) vs VIX (accent, dashed) over the last 30 days.
+// HRVixChart — resting HR (red) vs VIX (black) over the last 30 days.
 // Graph-paper styling: horizontal-only grid, no chart background. Lines bridge
 // missing days (e.g. VIX over weekends when markets are closed) so they read
 // as continuous.
@@ -21,7 +21,7 @@ import {
 } from "./analysis";
 
 const INK = "#1A1916";
-const ACCENT = "#2C4A6E";
+const HR = "#C0392B"; // heart rate — warm red
 const MUTED = "#6B6860";
 const PAPER = "#FAFAF8";
 
@@ -136,8 +136,8 @@ export default function HRVixChart({
               yAxisId="hr"
               type="monotone"
               dataKey="restingHR"
-              stroke={INK}
-              strokeWidth={1.5}
+              stroke={HR}
+              strokeWidth={1.75}
               dot={false}
               connectNulls
               isAnimationActive={false}
@@ -146,9 +146,8 @@ export default function HRVixChart({
               yAxisId="vix"
               type="monotone"
               dataKey="vix"
-              stroke={ACCENT}
+              stroke={INK}
               strokeWidth={1.5}
-              strokeDasharray="3 3"
               dot={false}
               connectNulls
               isAnimationActive={false}
@@ -163,10 +162,10 @@ export default function HRVixChart({
         className="mt-1 flex items-center gap-4"
       >
         <span>
-          <span style={{ color: INK }}>—</span> HR
+          <span style={{ color: HR }}>—</span> HR
         </span>
         <span>
-          <span style={{ color: ACCENT }}>- -</span> VIX
+          <span style={{ color: INK }}>—</span> VIX
         </span>
       </div>
 
