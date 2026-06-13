@@ -1,3 +1,5 @@
+// Applies schema.sql to the database in DATABASE_URL. Run once after creating
+// the Heroku Postgres add-on:  npm run db:init
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -11,11 +13,13 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-const sql = readFileSync(join(__dirname, "..", "db", "schema.sql"), "utf8");
+const sql = readFileSync(join(__dirname, "..", "schema.sql"), "utf8");
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes("amazonaws.com")
+  ssl: /amazonaws\.com|herokuapp|render\.com|sslmode=require/i.test(
+    process.env.DATABASE_URL
+  )
     ? { rejectUnauthorized: false }
     : undefined,
 });

@@ -1,5 +1,4 @@
 import { useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -7,54 +6,33 @@ const Contact = () => {
     email: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  // Shows the inline confirmation line below the submit button on success.
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    const dataToSubmit = {
-      ...formData,
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(
-        "https://673dfa030118dbfe86099e55.mockapi.io/resume/v1/Contacts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataToSubmit),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit form");
-      }
-
-      const result = await response.json();
-      console.log("Form submitted successfully:", result);
-      alert("Thank you for reaching out! Your message has been sent.");
-
-      setFormData({ name: "", email: "", message: "" });
-      navigate("/");
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("There was an issue submitting the form. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    // Client-side validation only. The previous mockapi.io endpoint was a dead
+    // placeholder, so there is no network call here.
+    // TODO: replace with real form handler before shipping
+    const { name, email, message } = formData;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if (!name.trim() || !emailOk || !message.trim()) {
+      setSubmitted(false);
+      return;
     }
+
+    setSubmitted(true);
+    setFormData({ name: "", email: "", message: "" });
   };
 
   const fieldClasses =
     "block w-full bg-transparent border-0 border-b border-rule text-ink " +
-    "px-0 py-3 focus:border-accent focus:ring-0 focus:outline-none " +
-    "placeholder:text-ink-muted transition-colors duration-100";
+    "px-0 py-3 focus:border-[#2C4A6E] focus:ring-0 focus:outline-none " +
+    "placeholder:text-[#6B6860] transition-colors duration-100";
 
-  const labelClasses = "block text-small text-ink-soft mb-1";
+  // Labels use full ink (#1A1916) for hierarchy and AA contrast on #FAFAF8.
+  const labelClasses = "block text-small text-[#1A1916] mb-1";
 
   return (
     <div className="container-prose">
@@ -118,20 +96,28 @@ const Contact = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={
-              isSubmitting
-                ? "inline-block border border-rule text-ink-muted px-5 py-3 text-small font-medium cursor-not-allowed"
-                : "inline-block border border-ink text-ink px-5 py-3 text-small font-medium " +
-                  "hover:bg-ink hover:text-paper transition-colors duration-100 " +
-                  "focus:outline-none focus-visible:outline focus-visible:outline-2 " +
-                  "focus-visible:outline-offset-2 focus-visible:outline-accent"
-            }
-          >
-            {isSubmitting ? "Sending…" : "Send message"}
-          </button>
+          <div>
+            <button
+              type="submit"
+              className={
+                "inline-block border border-ink text-ink px-5 py-3 text-small font-medium " +
+                "hover:bg-ink hover:text-paper transition-colors duration-100 " +
+                "focus:outline-none focus-visible:outline focus-visible:outline-2 " +
+                "focus-visible:outline-offset-2 focus-visible:outline-accent"
+              }
+            >
+              Send message
+            </button>
+
+            {/* Inline confirmation — fades in over 200ms on a valid submit. */}
+            <p
+              aria-live="polite"
+              className="mt-3 text-small italic transition-opacity duration-200"
+              style={{ color: "#6B6860", opacity: submitted ? 1 : 0 }}
+            >
+              Got it — I&rsquo;ll be in touch.
+            </p>
+          </div>
         </form>
       </section>
 

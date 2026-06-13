@@ -3,3 +3,6 @@ node_modules
 .env.local
 .DS_Store
 npm-debug.log*
+
+# Fitbit tokens are refreshed at runtime and written here — never commit them.
+tokens.json
