@@ -4,5 +4,5 @@ node_modules
 .DS_Store
 npm-debug.log*
 
-# Fitbit tokens are refreshed at runtime and written here — never commit them.
+# Any runtime token cache — never commit credentials.
 tokens.json

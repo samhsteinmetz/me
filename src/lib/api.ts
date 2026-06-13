@@ -25,7 +25,7 @@ export interface IntradayPoint {
   value: number;
 }
 
-/** Error carrying the HTTP status so callers can special-case 401 (Fitbit). */
+/** Error carrying the HTTP status so callers can special-case 401 (auth). */
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {

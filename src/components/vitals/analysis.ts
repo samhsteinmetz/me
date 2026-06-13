@@ -17,7 +17,7 @@ export interface MergedPoint {
 
 /**
  * Join HR and VIX series on `date`. Days present in one series but not the
- * other get `null` for the missing metric (weekends have no VIX; missed Fitbit
+ * other get `null` for the missing metric (weekends have no VIX; missed wearable
  * syncs have no HR) so Recharts can render them as gaps with connectNulls={false}.
  */
 export function joinHrVix(hr: HrPoint[], vix: VixPoint[]): MergedPoint[] {

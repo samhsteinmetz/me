@@ -216,7 +216,7 @@ export default function VitalsPanel() {
                   style={{ fontSize: 12, color: MUTED }}
                   className="italic"
                 >
-                  Fitbit connection needs refresh.
+                  Health connection needs refresh.
                 </p>
               ) : hrError ? (
                 <p

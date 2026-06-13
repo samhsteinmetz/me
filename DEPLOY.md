@@ -32,15 +32,16 @@ client knows is `VITE_API_URL`; everything sensitive stays server-side.
 
 | Variable                        | Purpose                                          |
 | ------------------------------- | ------------------------------------------------ |
-| `DATABASE_URL`                  | Heroku Postgres (set automatically by the add-on)|
-| `FITBIT_CLIENT_ID`              | Fitbit app client id                             |
-| `FITBIT_CLIENT_SECRET`          | Fitbit app client secret                         |
-| `FITBIT_ACCESS_TOKEN`           | initial Fitbit access token (auto-refreshes)     |
-| `FITBIT_REFRESH_TOKEN`          | initial Fitbit refresh token                     |
+| `DATABASE_URL`                  | Postgres connection (set automatically by add-on)|
+| `GOOGLE_HEALTH_CLIENT_ID`       | Google OAuth 2.0 client id                        |
+| `GOOGLE_HEALTH_CLIENT_SECRET`   | Google OAuth 2.0 client secret                    |
+| `GOOGLE_HEALTH_REFRESH_TOKEN`   | durable refresh token (from `/auth/google`)       |
+| `GOOGLE_HEALTH_ACCESS_TOKEN`    | optional initial access token (auto-refreshes)    |
+| `GOOGLE_HEALTH_REDIRECT_URI`    | must match the URI registered in Cloud Console    |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | full service-account JSON as one string          |
-| `ALLOWED_ORIGIN`                | `https://samhsteinmetz.github.io`                |
+| `ALLOWED_ORIGIN`                | allowed origins, comma-separated (no wildcard)   |
 | `ALLOWED_EMAILS`                | optional allowlist for who may log coffee        |
-| `PORT`                          | set automatically by Heroku                      |
+| `PORT`                          | set automatically by the host                    |
 
 ## 3. Firebase setup
 
@@ -51,12 +52,15 @@ client knows is `VITE_API_URL`; everything sensitive stays server-side.
 4. Add your GitHub Pages domain under **Authentication → Settings → Authorized
    domains** so `signInWithPopup` works in production.
 
-## 4. Fitbit app registration
+## 4. Google Health API setup
 
-1. <https://dev.fitbit.com> → register a **Personal** app (needed for intraday).
-2. Copy Client ID / Secret into the Heroku vars.
-3. Use the [OAuth 2.0 tutorial](https://dev.fitbit.com/build/reference/web-api/troubleshooting-guide/oauth2-tutorial/)
-   to get the initial access + refresh tokens (`heart`, `activity` scopes).
+1. In [Google Cloud Console](https://console.cloud.google.com/), enable the
+   **Health API** and request the read-only health scopes.
+2. Create an **OAuth 2.0 Client ID** (Web application) and register the redirect
+   URI `https://<your-host>/auth/google/callback`.
+3. Copy the Client ID / Secret into the backend env vars.
+4. After deploying, visit `https://<your-host>/auth/google` once, consent, and
+   copy the printed **refresh token** into `GOOGLE_HEALTH_REFRESH_TOKEN`.
 
 ## 5. Push the frontend to GitHub Pages
 
@@ -84,9 +88,10 @@ git subtree push --prefix server heroku main
 
 ## Final checklist
 
-- [ ] `VITE_API_URL` points at the deployed Heroku backend
-- [ ] `ALLOWED_ORIGIN` on Heroku equals the GitHub Pages origin
+- [ ] `VITE_API_URL` points at the deployed backend
+- [ ] `ALLOWED_ORIGIN` on the backend includes the GitHub Pages origin
 - [ ] Firebase Google provider enabled + GitHub Pages domain authorized
-- [ ] Fitbit + Firebase service-account vars set on Heroku
+- [ ] Google Health + Firebase service-account vars set on the backend
+- [ ] `/auth/google` run once and refresh token saved to env
 - [ ] `server/schema.sql` applied to the database
 - [ ] No secrets in the frontend build (`dist/`) — only `VITE_*` public values

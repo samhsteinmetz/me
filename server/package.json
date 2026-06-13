@@ -2,7 +2,7 @@
   "name": "samhsteinmetz-vitals-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Express backend for the vitals side panel on samhsteinmetz.github.io (Fitbit + Yahoo Finance VIX + Postgres coffee log)",
+  "description": "Express backend for the vitals side panel on samhsteinmetz.github.io (Google Health API + Yahoo Finance VIX + Postgres coffee log)",
   "main": "index.js",
   "type": "module",
   "engines": {
