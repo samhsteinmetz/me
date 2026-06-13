@@ -2,14 +2,17 @@
 //
 //   GET /api/vix → [{ date, vix }]  (last ~30 calendar days, ascending)
 //
-// Uses the yahoo-finance2 package (no API key required). Falls back to
-// deterministic mock data if the upstream call fails or MOCK_DATA=true, so
-// the frontend always has something to render.
+// Fetches Yahoo Finance's public chart JSON directly (no API key, no SDK —
+// the yahoo-finance2 package's API is unstable across versions). Falls back to
+// deterministic mock data if the upstream call fails or MOCK_DATA=true, so the
+// frontend always has something to render.
 
 import { Router } from "express";
-import yahooFinance from "yahoo-finance2";
 
 const router = Router();
+
+const VIX_URL =
+  "https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=1mo&interval=1d";
 
 function mockVix(days = 30) {
   const out = [];
@@ -34,33 +37,40 @@ function mockVix(days = 30) {
   return out;
 }
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
   if (process.env.MOCK_DATA === "true") {
     res.set("X-Data-Source", "mock");
     return res.json(mockVix(30));
   }
 
   try {
-    const period1 = new Date();
-    period1.setDate(period1.getDate() - 30);
-
-    const rows = await yahooFinance.historical("^VIX", {
-      period1,
-      interval: "1d",
+    const upstream = await fetch(VIX_URL, {
+      headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" },
     });
+    if (!upstream.ok) throw new Error(`Yahoo chart -> ${upstream.status}`);
 
-    const series = rows
-      .map((r) => ({
-        date: new Date(r.date).toISOString().slice(0, 10),
-        vix: r.close != null ? Number(Number(r.close).toFixed(2)) : null,
+    const json = await upstream.json();
+    const result = json?.chart?.result?.[0];
+    const timestamps = result?.timestamp || [];
+    const closes = result?.indicators?.quote?.[0]?.close || [];
+
+    const series = timestamps
+      .map((ts, i) => ({
+        date: new Date(ts * 1000).toISOString().slice(0, 10),
+        vix: closes[i] != null ? Number(Number(closes[i]).toFixed(2)) : null,
       }))
       .filter((r) => r.vix != null)
       .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (!series.length) throw new Error("Yahoo chart returned no closes");
 
     res.set("X-Data-Source", "yahoo");
     res.json(series);
   } catch (err) {
     console.error("[/api/vix] falling back to mock:", err.message);
+    if (req.query.debug) {
+      return res.status(502).json({ error: "vix fetch failed", detail: err.message });
+    }
     res.set("X-Data-Source", "mock-fallback");
     res.json(mockVix(30));
   }
