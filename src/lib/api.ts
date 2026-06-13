@@ -1,54 +1,58 @@
-const BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+// api.ts — typed fetch helpers for the vitals backend.
+//
+// Base URL comes from VITE_API_URL (the Vite-native equivalent of the brief's
+// REACT_APP_API_URL — Vite only exposes vars prefixed VITE_ via import.meta.env).
+// No API keys ever live here; the frontend only knows the backend URL.
+
+export const API_BASE =
+  import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export interface HrPoint {
-  date: string;
-  restingHr: number | null;
+  date: string; // "YYYY-MM-DD"
+  restingHR: number;
 }
 export interface VixPoint {
-  date: string;
-  vix: number | null;
+  date: string; // "YYYY-MM-DD"
+  vix: number;
 }
-export interface CoffeeLog {
+export interface CoffeeEntry {
   id: number;
-  logged_at: string;
+  timestamp: string; // ISO
   notes: string | null;
 }
-
-interface SeriesResponse<T> {
-  source: string;
-  series: T[];
+export interface IntradayPoint {
+  time: string; // "HH:MM:SS"
+  value: number;
 }
 
-interface CoffeeResponse {
-  source: string;
-  logs: CoffeeLog[];
-}
-
-async function getJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { credentials: "omit" });
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText} on ${url}`);
+/** Error carrying the HTTP status so callers can special-case 401 (Fitbit). */
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
   }
-  return res.json();
 }
 
-export function fetchHr(days = 30) {
-  return getJson<SeriesResponse<HrPoint>>(`${BASE}/api/hr?days=${days}`);
+async function getJson<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: "omit" });
+  if (!res.ok) {
+    throw new ApiError(`${res.status} ${res.statusText}`, res.status);
+  }
+  return res.json() as Promise<T>;
 }
 
-export function fetchVix(days = 30) {
-  return getJson<SeriesResponse<VixPoint>>(`${BASE}/api/vix?days=${days}`);
-}
-
-export function fetchCoffee(days = 30) {
-  return getJson<CoffeeResponse>(`${BASE}/api/coffee?days=${days}`);
-}
+export const fetchHr = () => getJson<HrPoint[]>("/api/hr");
+export const fetchVix = () => getJson<VixPoint[]>("/api/vix");
+export const fetchCoffee = () => getJson<CoffeeEntry[]>("/api/coffee");
+export const fetchIntraday = (date: string) =>
+  getJson<IntradayPoint[]>(`/api/hr-intraday?date=${encodeURIComponent(date)}`);
 
 export async function postCoffee(
   idToken: string,
-  body: { notes?: string | null; logged_at?: string }
-): Promise<{ source: string; log: CoffeeLog }> {
-  const res = await fetch(`${BASE}/api/coffee`, {
+  body: { timestamp: string; notes: string | null }
+): Promise<{ success: boolean; entry: CoffeeEntry }> {
+  const res = await fetch(`${API_BASE}/api/coffee`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -57,13 +61,7 @@ export async function postCoffee(
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    let detail = "";
-    try {
-      detail = (await res.json()).error || "";
-    } catch {
-      // ignore
-    }
-    throw new Error(`POST /api/coffee failed: ${res.status} ${detail}`);
+    throw new ApiError(`POST /api/coffee failed: ${res.status}`, res.status);
   }
   return res.json();
 }

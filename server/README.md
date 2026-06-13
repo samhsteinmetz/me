@@ -1,106 +1,133 @@
 # vitals-api
 
-Backend for the `/vitals` page on `samhsteinmetz.github.io`. Tiny Express
-service that fronts three data sources so frontend code never sees API keys:
+Express backend for the **vitals side panel** on `samhsteinmetz.github.io`.
+It fronts three data sources so the React frontend never sees an API key:
 
-- `GET /api/hr` — daily resting heart rate from Fitbit
-- `GET /api/vix` — daily ^VIX close from a Yahoo-Finance-style RapidAPI provider
-- `GET /api/coffee` — coffee log entries from Heroku Postgres
-- `POST /api/coffee` — adds a new coffee log; requires Firebase ID token
-  whose email is on `ALLOWED_EMAILS`
+| Method & path             | Source                | Auth            |
+| ------------------------- | --------------------- | --------------- |
+| `GET /api/hr`             | Fitbit resting HR     | none (public)   |
+| `GET /api/hr-intraday`    | Fitbit per-minute HR  | none (public)   |
+| `GET /api/vix`            | Yahoo Finance (`^VIX`)| none (public)   |
+| `GET /api/coffee`         | Postgres `coffee_logs`| none (public)   |
+| `POST /api/coffee`        | Postgres `coffee_logs`| Firebase ID token |
 
-The server runs cleanly with zero credentials configured: every endpoint
-falls back to deterministic mock data and reports the source via an
-`X-Data-Source` response header. This lets the frontend render the page
-end-to-end during dev without anything being set up.
+> The server runs with **zero credentials** — every endpoint falls back to
+> deterministic mock data (see `X-Data-Source` response header). This lets the
+> frontend render end-to-end before any integration is wired up.
 
-## Local setup
+## Endpoint shapes
+
+```jsonc
+GET /api/hr           → [{ "date": "2024-05-01", "restingHR": 58 }, ...]
+GET /api/hr-intraday?date=2024-05-14
+                      → [{ "time": "09:00:00", "value": 62 }, ...]
+GET /api/vix          → [{ "date": "2024-05-01", "vix": 14.2 }, ...]
+GET /api/coffee       → [{ "id": 1, "timestamp": "2024-05-14T09:23:00Z", "notes": "double espresso" }, ...]
+POST /api/coffee      ← { "timestamp": "<ISO>", "notes": "optional" }
+                      → { "success": true, "entry": { "id", "timestamp", "notes" } }
+```
+
+`POST /api/coffee` requires `Authorization: Bearer <firebase-id-token>`.
+
+## Local development
 
 ```bash
 cd server
-cp .env.example .env
-# edit .env with whatever credentials you want to wire up
+cp .env.example .env       # optional — runs in mock mode with no edits
 npm install
-npm run dev
-# → http://localhost:3001/health
+npm run dev                # → http://localhost:3001/health
 ```
 
-Frontend reads `VITE_API_BASE_URL` (set in the repo root `.env`) — point it
-at `http://localhost:3001` for dev or your Heroku URL for production.
+---
 
-## Deploy to Heroku
+## Deployment guide (Heroku)
+
+### 1. Redeem Heroku credits (GitHub Student Developer Pack)
+
+1. Go to <https://education.github.com/pack> and verify your student status.
+2. Find the **Heroku** offer and click through to claim it.
+3. In your [Heroku account billing settings](https://dashboard.heroku.com/account/billing),
+   confirm the platform credits are applied. (Heroku also requires a verified
+   credit card on file even when using credits.)
+
+### 2. Create the Heroku app + Postgres add-on
 
 ```bash
-# from the repo root
+heroku login
 heroku create samhsteinmetz-vitals-api
 heroku addons:create heroku-postgresql:essential-0 --app samhsteinmetz-vitals-api
-heroku config:set CORS_ORIGIN=https://samhsteinmetz.github.io --app samhsteinmetz-vitals-api
+# DATABASE_URL is now set automatically in the app's config vars.
+```
 
-# copy each secret from your .env into Heroku config
-heroku config:set FIREBASE_PROJECT_ID=... FIREBASE_CLIENT_EMAIL=... \
-  FIREBASE_PRIVATE_KEY="$(cat firebase-key.txt)" \
-  ALLOWED_EMAILS=samhsteinmetz@gmail.com \
-  FITBIT_CLIENT_ID=... FITBIT_CLIENT_SECRET=... FITBIT_REFRESH_TOKEN=... \
-  RAPIDAPI_KEY=... \
-  --app samhsteinmetz-vitals-api
+### 3. Create the database schema
 
-# Heroku deploys from this subdirectory via git subtree:
-git subtree push --prefix server heroku main
+```bash
+# Easiest: pipe schema.sql straight into the attached database.
+heroku pg:psql --app samhsteinmetz-vitals-api < schema.sql
 
-# initialize the database schema (one time)
+# Or, after the first deploy:
 heroku run npm run db:init --app samhsteinmetz-vitals-api
 ```
 
-## Required configuration
+### 4. Register a Fitbit app + get initial tokens
 
-| Env var | Purpose | Without it |
-|---|---|---|
-| `DATABASE_URL` | Heroku Postgres connection string | In-memory store (resets on restart) |
-| `FIREBASE_PROJECT_ID` + `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` (or `FIREBASE_SERVICE_ACCOUNT_JSON`) | Verify Firebase Google ID tokens server-side | POST `/api/coffee` returns 503 |
-| `ALLOWED_EMAILS` | Comma-separated email allowlist | No one can POST |
-| `FITBIT_CLIENT_ID` + `FITBIT_CLIENT_SECRET` + `FITBIT_REFRESH_TOKEN` | Personal-app OAuth flow | `/api/hr` returns deterministic mock data |
-| `RAPIDAPI_KEY` + `RAPIDAPI_HOST` | VIX provider | `/api/vix` returns deterministic mock data |
-| `CORS_ORIGIN` | Comma-separated frontend origins | Defaults to `http://localhost:5173` |
-| `MOCK_DATA=true` | Force every endpoint into mock mode | Off by default |
+1. Sign in at <https://dev.fitbit.com> → **Manage → Register an App**.
+2. Application type: **Personal** (single user → access to intraday data).
+3. OAuth 2.0 Application Type: **Personal**; Callback URL can be
+   `http://localhost` for the manual token flow.
+4. Note the **Client ID** and **Client Secret**.
+5. Use the [OAuth 2.0 tutorial](https://dev.fitbit.com/build/reference/web-api/troubleshooting-guide/oauth2-tutorial/)
+   to obtain an initial **access token** and **refresh token** with the
+   `heart` and `activity` scopes.
+6. The server auto-refreshes the access token on 401 and writes the new pair
+   to `tokens.json` (gitignored). The initial env values seed the first call.
 
-## Routes
+### 5. Get the Firebase service-account JSON
 
-### `GET /api/hr?days=30`
-```json
-{
-  "source": "fitbit" | "mock" | "mock-fallback",
-  "series": [{ "date": "2026-05-15", "restingHr": 63 }, ...]
-}
+1. [Firebase Console](https://console.firebase.google.com/) → your project →
+   **Project Settings → Service accounts**.
+2. **Generate new private key** → downloads a JSON file.
+3. You will paste the **entire file contents as one string** into the
+   `FIREBASE_SERVICE_ACCOUNT_JSON` config var (next step).
+
+### 6. Set all Heroku config vars
+
+```bash
+heroku config:set \
+  ALLOWED_ORIGIN="https://samhsteinmetz.github.io" \
+  ALLOWED_EMAILS="samhsteinmetz@gmail.com" \
+  FITBIT_CLIENT_ID="..." \
+  FITBIT_CLIENT_SECRET="..." \
+  FITBIT_ACCESS_TOKEN="..." \
+  FITBIT_REFRESH_TOKEN="..." \
+  FIREBASE_SERVICE_ACCOUNT_JSON="$(cat path/to/service-account.json)" \
+  --app samhsteinmetz-vitals-api
+# DATABASE_URL and PORT are set by Heroku automatically.
 ```
 
-### `GET /api/vix?days=30`
-```json
-{
-  "source": "rapidapi" | "mock" | "mock-fallback",
-  "series": [{ "date": "2026-05-15", "vix": 16.4 }, ...]
-}
+### 7. Deploy
+
+This backend lives in the `server/` subdirectory of the frontend repo, so push
+it to Heroku with `git subtree`:
+
+```bash
+# from the repository root
+git subtree push --prefix server heroku main
 ```
 
-### `GET /api/coffee?days=30`
-```json
-{
-  "source": "postgres" | "mock" | "memory",
-  "logs": [{ "id": 1, "logged_at": "2026-06-12T13:42:00Z", "notes": "iced" }, ...]
-}
-```
+If you instead keep the backend in its own repo, a plain `git push heroku main`
+works.
 
-### `POST /api/coffee`
-Headers: `Authorization: Bearer <firebase-id-token>`
-Body (all optional): `{ "logged_at": "2026-06-13T...", "notes": "..." }`
-Returns `201` with the inserted row.
+---
 
 ## Notes
 
-- The Fitbit refresh-token flow is the "Personal" application pattern — single user,
-  long-lived refresh token stored as an env var. For production multi-user this
-  would need a token store; for a portfolio site it's fine.
-- VIX endpoint expects a Yahoo-Finance-shaped chart response; if you swap
-  providers, adjust the parsing in `lib/vix.js`.
-- All POST input is length-capped (`notes` to 280 chars, body to 32 KB) and the
-  email allowlist gates writes. Read endpoints are public on purpose so the
-  page is shareable.
+- **CORS** is locked to `ALLOWED_ORIGIN`; local Vite origins (5173/4173) are
+  additionally allowed for development.
+- **Intraday HR** responses are cached in memory per date for 1 hour to keep
+  the per-coffee response-curve fetches fast.
+- **Token write-back** to `tokens.json` works locally; Heroku's filesystem is
+  ephemeral, so after a dyno restart the seed env tokens are used again (and
+  refreshed on the next 401).
+- `POST /api/coffee` strips HTML from `notes`, caps it at 200 chars, and
+  validates `timestamp` is a valid ISO date.

@@ -134,19 +134,25 @@
      margin on each side; at md+ the margin grows to ≥4rem; at xl+ it
      reaches the full notebook 6rem each side. */
   .container-prose {
-    width: min(72ch, 100% - 3rem);
+    width: min(680px, 100% - 3rem);
     margin-inline: auto;
   }
 
   @media (min-width: 768px) {
     .container-prose {
-      width: min(72ch, 100% - 8rem);
+      width: min(680px, 100% - 8rem);
     }
   }
 
-  @media (min-width: 1280px) {
+  /* Beyond 1200px, reserve the right third of the viewport for the vitals
+     panel: pin a fixed right margin (~33vw) and let the left margin auto-fill,
+     which shifts the 680px column left of center without overlapping the panel
+     (panel is 380px at the right edge; content's right edge stays clear of it). */
+  @media (min-width: 1200px) {
     .container-prose {
-      width: min(72ch, 100% - 12rem);
+      width: 680px;
+      margin-left: auto;
+      margin-right: 33.333vw;
     }
   }
 
@@ -190,6 +196,32 @@
   .link-bare:hover {
     color: var(--color-accent);
     text-decoration: none;
+  }
+
+  /* Vitals side panel: fixed width on desktop, full-viewport on mobile. */
+  .vitals-panel {
+    width: 380px;
+  }
+  @media (max-width: 767px) {
+    .vitals-panel {
+      width: 100vw;
+    }
+  }
+
+  /* Custom 4px scrollbar for the panel body: thumb is ink at 20%. */
+  .vitals-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(26, 25, 22, 0.2) transparent;
+  }
+  .vitals-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+  .vitals-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .vitals-scroll::-webkit-scrollbar-thumb {
+    background: rgba(26, 25, 22, 0.2);
+    border-radius: 0;
   }
 
   /* Notebook list: em-dash bullet instead of disc */

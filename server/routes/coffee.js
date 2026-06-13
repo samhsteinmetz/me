@@ -1,83 +1,112 @@
+// routes/coffee.js — coffee log CRUD.
+//
+//   GET  /api/coffee  → [{ id, timestamp, notes }]  (most recent first, public)
+//   POST /api/coffee  → insert one entry (Firebase auth required)
+//
+// Falls back to an in-memory store when DATABASE_URL is missing so the panel
+// works end-to-end in local dev without Postgres.
+
 import { Router } from "express";
-import { getPool, hasDb } from "../lib/db.js";
-import { requireAllowedUser } from "../lib/auth.js";
+import { getPool, hasDb } from "../db.js";
+import { verifyFirebaseToken } from "../middleware/auth.js";
 
 const router = Router();
 
-// In-memory store used when DATABASE_URL is missing. Resets on restart.
-const memoryStore = [];
+// In-memory fallback (resets on restart). Mirrors the DB row shape.
+const memory = [];
+let memoryId = 1000;
 
-function mockCoffeeLogs(days = 30) {
-  // A few realistic coffee logs scattered across the last `days`.
-  const now = Date.now();
-  const day = 86400_000;
-  const pattern = [0.5, 1.4, 2.6, 3.5, 4.5, 5.6, 7.4, 9.5, 11.4, 12.6, 14.5, 15.4, 17.5, 18.6, 21.4];
-  return pattern
-    .filter((d) => d <= days)
-    .map((d, i) => ({
-      id: i + 1,
-      logged_at: new Date(now - d * day - (i % 3) * 3600_000 - 7 * 3600_000).toISOString(),
-      notes: i % 4 === 0 ? "iced" : null,
-    }));
+// Seed a few mock entries anchored to the same clock hours the intraday mock
+// bumps HR (9:15 / 14:15) so the coffee response curve renders in mock mode.
+function seedMockCoffee() {
+  if (memory.length) return;
+  const hours = [
+    { h: 9, m: 15, notes: "double espresso" },
+    { h: 14, m: 15, notes: null },
+  ];
+  const now = new Date();
+  for (let day = 1; day <= 6; day++) {
+    for (const { h, m, notes } of hours) {
+      const d = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - day,
+        h,
+        m,
+        0
+      );
+      memory.push({
+        id: memoryId++,
+        timestamp: d.toISOString(),
+        notes,
+      });
+    }
+  }
+  memory.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
-router.get("/", async (req, res) => {
-  const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 90);
-  const cutoff = new Date(Date.now() - days * 86400_000).toISOString();
+// Strip any HTML tags and clamp length. Returns null for empty/absent notes.
+function sanitizeNotes(raw) {
+  if (raw == null) return null;
+  if (typeof raw !== "string") return undefined; // signal invalid
+  const stripped = raw.replace(/<[^>]*>/g, "").trim();
+  if (!stripped) return null;
+  return stripped.slice(0, 200);
+}
 
+// GET /api/coffee — public, newest first.
+router.get("/", async (_req, res) => {
   if (process.env.MOCK_DATA === "true" || !hasDb()) {
+    seedMockCoffee();
     res.set("X-Data-Source", "mock");
-    return res.json({
-      source: "mock",
-      logs: [...memoryStore, ...mockCoffeeLogs(days)].sort(
-        (a, b) => +new Date(b.logged_at) - +new Date(a.logged_at)
-      ),
-    });
+    return res.json(memory);
   }
 
   try {
-    const pool = getPool();
-    const { rows } = await pool.query(
-      `SELECT id, logged_at, notes
-         FROM coffee_logs
-        WHERE logged_at >= $1
-        ORDER BY logged_at DESC`,
-      [cutoff]
+    const { rows } = await getPool().query(
+      "SELECT id, timestamp, notes FROM coffee_logs ORDER BY timestamp DESC"
     );
     res.set("X-Data-Source", "postgres");
-    res.json({ source: "postgres", logs: rows });
+    res.json(rows);
   } catch (err) {
-    console.error("[/api/coffee GET] db query failed:", err.message);
-    res.status(500).json({ error: "query_failed" });
+    console.error("[/api/coffee GET]", err.message);
+    res.status(500).json({ error: "Failed to load coffee log" });
   }
 });
 
-router.post("/", requireAllowedUser, async (req, res) => {
-  const notes = typeof req.body?.notes === "string" ? req.body.notes.slice(0, 280) : null;
-  const logged_at = req.body?.logged_at
-    ? new Date(req.body.logged_at).toISOString()
-    : new Date().toISOString();
+// POST /api/coffee — requires a valid Firebase ID token.
+router.post("/", verifyFirebaseToken, async (req, res) => {
+  const ts = req.body?.timestamp;
+  if (typeof ts !== "string" || Number.isNaN(Date.parse(ts))) {
+    return res.status(400).json({ error: "Invalid timestamp (ISO required)" });
+  }
+  const timestamp = new Date(ts).toISOString();
 
-  if (!hasDb()) {
-    const entry = { id: memoryStore.length + 1, user_email: req.user.email, logged_at, notes };
-    memoryStore.unshift(entry);
+  const notes = sanitizeNotes(req.body?.notes);
+  if (notes === undefined) {
+    return res.status(400).json({ error: "notes must be a string" });
+  }
+
+  if (process.env.MOCK_DATA === "true" || !hasDb()) {
+    seedMockCoffee();
+    const entry = { id: memoryId++, timestamp, notes };
+    memory.unshift(entry);
     res.set("X-Data-Source", "memory");
-    return res.status(201).json({ source: "memory", log: entry });
+    return res.status(201).json({ success: true, entry });
   }
 
   try {
-    const pool = getPool();
-    const { rows } = await pool.query(
-      `INSERT INTO coffee_logs (user_email, logged_at, notes)
-       VALUES ($1, $2, $3)
-       RETURNING id, logged_at, notes`,
-      [req.user.email, logged_at, notes]
+    const { rows } = await getPool().query(
+      `INSERT INTO coffee_logs (timestamp, notes)
+       VALUES ($1, $2)
+       RETURNING id, timestamp, notes`,
+      [timestamp, notes]
     );
     res.set("X-Data-Source", "postgres");
-    res.status(201).json({ source: "postgres", log: rows[0] });
+    res.status(201).json({ success: true, entry: rows[0] });
   } catch (err) {
-    console.error("[/api/coffee POST] insert failed:", err.message);
-    res.status(500).json({ error: "insert_failed" });
+    console.error("[/api/coffee POST]", err.message);
+    res.status(500).json({ error: "Failed to save coffee log" });
   }
 });
 

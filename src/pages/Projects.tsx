@@ -45,7 +45,7 @@ const Projects: React.FC = () => {
         <p className="mt-6 font-mono text-mono text-ink-soft">
           friends_service.ts
         </p>
-        <pre className="mt-2 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed">
+        <pre className="mt-2 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed border-t border-[#1A1916]/15">
           <code>
             {"export const addFriendsToListOfProfiles = async (\n" +
               "  friendUsername: string,\n" +
@@ -129,7 +129,7 @@ const Projects: React.FC = () => {
         </ul>
 
         <p className="mt-6 font-mono text-mono text-ink-soft">head_count.py</p>
-        <pre className="mt-2 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed">
+        <pre className="mt-2 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed border-t border-[#1A1916]/15">
           <code>
             {"def update_people_count_callback(people_count):\n" +
               "    # Update the people count in the database\n" +
@@ -175,7 +175,7 @@ const Projects: React.FC = () => {
         </ul>
 
         <p className="mt-6 font-mono text-mono text-ink-soft">job_board.sql</p>
-        <pre className="mt-2 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed">
+        <pre className="mt-2 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed border-t border-[#1A1916]/15">
           <code>
             {"CREATE TABLE hiring_manager (\n" +
               "    EmployeeID INT AUTO_INCREMENT PRIMARY KEY,\n" +
@@ -234,7 +234,7 @@ const Projects: React.FC = () => {
         <p className="mt-6 font-mono text-mono text-ink-soft">
           twitter_async.py
         </p>
-        <pre className="mt-2 mb-8 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed">
+        <pre className="mt-2 mb-8 bg-paper-edge text-ink p-4 overflow-auto font-mono text-code leading-relaxed border-t border-[#1A1916]/15">
           <code>
             {'async def twitter_api_call(search="", mode="popular"):\n' +
               "    public_tweets = api.search_tweets(\n" +

@@ -4,11 +4,15 @@ interface GitHubProps {
 
 const GitHub: React.FC<GitHubProps> = ({ url }) => {
   return (
+    // Flat notebook button: transparent bg, 1px ink border (→ full ink on
+    // hover), ink text. No gradient, no shadow, no transform.
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 align-middle text-mono font-mono"
+      className="inline-flex items-center gap-1.5 align-middle text-mono font-mono no-underline
+                 border border-[#1A1916]/40 hover:border-[#1A1916] text-[#1A1916]
+                 bg-transparent px-2 py-0.5 transition-colors duration-100"
     >
       <svg
         className="h-3.5 w-3.5 fill-current"
