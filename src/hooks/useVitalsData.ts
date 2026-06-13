@@ -38,7 +38,7 @@ export interface VitalsData {
   loading: boolean;
   error: string | null;
   hrError: string | null;
-  /** True when /api/hr returned 401 — Fitbit token needs a refresh. */
+  /** True when /api/hr returned 401 — Google Health token needs a refresh. */
   hrAuthError: boolean;
   vixError: string | null;
   coffeeError: string | null;

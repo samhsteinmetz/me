@@ -1,126 +1,74 @@
-// routes/hr.js — Fitbit heart-rate endpoints.
+// routes/hr.js — Google Health heart-rate endpoints.
 //
-//   GET /api/hr            → last 30 days of resting heart rate
+//   GET /api/hr            → last 30 days of daily resting heart rate
 //   GET /api/hr-intraday   → per-minute heart rate for a single date (?date=)
 //
-// Fitbit auth model (personal, single-user app):
-//   - We hold a long-lived FITBIT_REFRESH_TOKEN and short-lived access token.
-//   - On any 401 we refresh using the client id/secret + refresh token, then
-//     persist the new tokens back to tokens.json (fine for a personal app —
-//     no multi-user token store needed).
+// Data source: Google Health API v4 (health.googleapis.com). All OAuth /
+// token-refresh logic lives in ../googleHealth.js and is shared across routes.
 //
-// When Fitbit credentials are missing (or MOCK_DATA=true) every endpoint
+//   - Resting HR uses the native `daily-resting-heart-rate` data type, which
+//     returns one { date, beatsPerMinute } point per day.
+//   - Intraday uses the `heart-rate` data type, a SAMPLE type whose points are
+//     { sampleTime, beatsPerMinute } (no "interval" — heart rate is sampled).
+//
+// When Google Health credentials are missing (or MOCK_DATA=true) every endpoint
 // returns deterministic mock data so the frontend renders end-to-end in dev.
 
 import { Router } from "express";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { hasGoogleHealth, listAllDataPoints } from "../googleHealth.js";
 
 const router = Router();
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const TOKENS_PATH = join(__dirname, "..", "tokens.json");
-const TOKEN_URL = "https://api.fitbit.com/oauth2/token";
 
 // Coffee bump anchors shared with the mock coffee log so the response-curve
 // feature visibly works in mock mode. (clock hours, local time)
 const MOCK_COFFEE_HOURS = [{ h: 9, m: 15 }, { h: 14, m: 15 }];
 
-function hasFitbit() {
-  return Boolean(
-    process.env.FITBIT_CLIENT_ID &&
-      process.env.FITBIT_CLIENT_SECRET &&
-      (process.env.FITBIT_REFRESH_TOKEN || existsSync(TOKENS_PATH))
-  );
-}
-
 function useMock() {
-  return process.env.MOCK_DATA === "true" || !hasFitbit();
+  return process.env.MOCK_DATA === "true" || !hasGoogleHealth();
 }
 
-// ---- token storage ---------------------------------------------------------
+// ---- date / value helpers --------------------------------------------------
 
-function loadTokens() {
-  if (existsSync(TOKENS_PATH)) {
-    try {
-      return JSON.parse(readFileSync(TOKENS_PATH, "utf8"));
-    } catch {
-      /* fall through to env */
-    }
-  }
-  return {
-    access_token: process.env.FITBIT_ACCESS_TOKEN || null,
-    refresh_token: process.env.FITBIT_REFRESH_TOKEN || null,
-  };
+function ymd(date) {
+  return date.toISOString().slice(0, 10);
 }
 
-function saveTokens(tokens) {
-  try {
-    writeFileSync(TOKENS_PATH, JSON.stringify(tokens, null, 2));
-  } catch (err) {
-    // On Heroku the filesystem is ephemeral; persisting may fail on read-only
-    // dynos. The in-process value is still used until the next restart.
-    console.warn("[hr] could not persist tokens.json:", err.message);
-  }
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
 }
 
-async function refreshAccessToken() {
-  const tokens = loadTokens();
-  const basic = Buffer.from(
-    `${process.env.FITBIT_CLIENT_ID}:${process.env.FITBIT_CLIENT_SECRET}`
-  ).toString("base64");
-
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${basic}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: tokens.refresh_token,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Fitbit token refresh failed: ${res.status}`);
-  }
-
-  const data = await res.json();
-  const next = {
-    access_token: data.access_token,
-    refresh_token: data.refresh_token || tokens.refresh_token,
-  };
-  saveTokens(next);
-  return next.access_token;
+// Google Health civil dates arrive as { year, month, day }.
+function civilDateToYmd(cd) {
+  if (!cd || cd.year == null) return null;
+  const m = String(cd.month ?? 1).padStart(2, "0");
+  const d = String(cd.day ?? 1).padStart(2, "0");
+  return `${cd.year}-${m}-${d}`;
 }
 
-/**
- * Call a Fitbit API path with the current access token. On 401, refresh once
- * and retry. Throws an Error tagged with `.status` so callers can map 401 →
- * "Fitbit connection needs refresh."
- */
-async function fitbitGet(path) {
-  let { access_token } = loadTokens();
+function toNumber(v) {
+  // beatsPerMinute is returned as a string in the Health API.
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  return Number.isFinite(n) ? n : null;
+}
 
-  const doFetch = (token) =>
-    fetch(`https://api.fitbit.com${path}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-  let res = await doFetch(access_token);
-  if (res.status === 401) {
-    access_token = await refreshAccessToken();
-    res = await doFetch(access_token);
+// Extract "HH:MM" from a heart-rate sample's sampleTime. Prefer civil time
+// (the wearable's local clock, which matches coffee timestamps); fall back to
+// the RFC-3339 physical time.
+function sampleClock(sampleTime) {
+  const t = sampleTime?.civilTime?.time;
+  if (t && t.hours != null) {
+    const hh = String(t.hours).padStart(2, "0");
+    const mm = String(t.minutes ?? 0).padStart(2, "0");
+    return `${hh}:${mm}`;
   }
-
-  if (!res.ok) {
-    const err = new Error(`Fitbit ${path} failed: ${res.status}`);
-    err.status = res.status;
-    throw err;
+  const phys = sampleTime?.physicalTime;
+  if (typeof phys === "string") {
+    const match = phys.match(/T(\d{2}:\d{2})/);
+    if (match) return match[1];
   }
-  return res.json();
+  return null;
 }
 
 // ---- intraday cache --------------------------------------------------------
@@ -190,7 +138,7 @@ function mockIntraday(date) {
 
 // ---- routes ----------------------------------------------------------------
 
-// GET /api/hr → [{ date, restingHR }]  (0/null days filtered out)
+// GET /api/hr → [{ date, restingHR }]  (0/null days filtered out, sorted asc)
 router.get("/hr", async (_req, res) => {
   if (useMock()) {
     res.set("X-Data-Source", "mock");
@@ -198,23 +146,27 @@ router.get("/hr", async (_req, res) => {
   }
 
   try {
-    const data = await fitbitGet(
-      "/1/user/-/activities/heart/date/today/30d.json"
-    );
-    const series = (data["activities-heart"] || [])
-      .map((row) => ({
-        date: row.dateTime,
-        restingHR:
-          row.value && typeof row.value === "object"
-            ? row.value.restingHeartRate ?? null
-            : null,
-      }))
-      .filter((row) => row.restingHR != null && row.restingHR !== 0);
-    res.set("X-Data-Source", "fitbit");
+    const start = ymd(daysAgo(30));
+    // Daily-summary filter pattern: `{dataType}.date >= "YYYY-MM-DD"`.
+    const filter = `dailyRestingHeartRate.date >= "${start}"`;
+    const points = await listAllDataPoints("daily-resting-heart-rate", filter);
+
+    const series = points
+      .map((dp) => {
+        const rhr = dp.dailyRestingHeartRate || {};
+        return {
+          date: civilDateToYmd(rhr.date),
+          restingHR: toNumber(rhr.beatsPerMinute),
+        };
+      })
+      .filter((row) => row.date && row.restingHR != null && row.restingHR !== 0)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.set("X-Data-Source", "google-health");
     res.json(series);
   } catch (err) {
     if (err.status === 401) {
-      return res.status(401).json({ error: "Fitbit token expired" });
+      return res.status(401).json({ error: "Google Health token expired" });
     }
     console.error("[/api/hr]", err.message);
     res.status(502).json({ error: "Failed to load heart rate data" });
@@ -242,18 +194,27 @@ router.get("/hr-intraday", async (req, res) => {
   }
 
   try {
-    const data = await fitbitGet(
-      `/1/user/-/activities/heart/date/${date}/1d/1min.json`
-    );
-    const series = (data["activities-heart-intraday"]?.dataset || []).map(
-      (row) => ({ time: row.time, value: row.value })
-    );
+    const next = ymd(new Date(new Date(`${date}T00:00:00Z`).getTime() + 86400000));
+    // Heart rate is a SAMPLE type → filter on sample_time.civil_time.
+    const filter =
+      `heartRate.sample_time.civil_time >= "${date}T00:00:00" ` +
+      `AND heartRate.sample_time.civil_time < "${next}T00:00:00"`;
+    const points = await listAllDataPoints("heart-rate", filter, 10000);
+
+    const series = points
+      .map((dp) => {
+        const hr = dp.heartRate || {};
+        return { time: sampleClock(hr.sampleTime), value: toNumber(hr.beatsPerMinute) };
+      })
+      .filter((row) => row.time && row.value != null)
+      .sort((a, b) => a.time.localeCompare(b.time));
+
     cacheSet(date, series);
-    res.set("X-Data-Source", "fitbit");
+    res.set("X-Data-Source", "google-health");
     res.json(series);
   } catch (err) {
     if (err.status === 401) {
-      return res.status(401).json({ error: "Fitbit token expired" });
+      return res.status(401).json({ error: "Google Health token expired" });
     }
     console.error("[/api/hr-intraday]", err.message);
     res.status(502).json({ error: "Failed to load intraday heart rate" });
