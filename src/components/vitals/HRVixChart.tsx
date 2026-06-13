@@ -1,6 +1,7 @@
 // HRVixChart — resting HR (ink) vs VIX (accent, dashed) over the last 30 days.
-// Graph-paper styling: horizontal-only grid, no chart background, gaps (not
-// zeros) on days a series is missing.
+// Graph-paper styling: horizontal-only grid, no chart background. Lines bridge
+// missing days (e.g. VIX over weekends when markets are closed) so they read
+// as continuous.
 
 import {
   CartesianGrid,
@@ -138,7 +139,7 @@ export default function HRVixChart({
               stroke={INK}
               strokeWidth={1.5}
               dot={false}
-              connectNulls={false}
+              connectNulls
               isAnimationActive={false}
             />
             <Line
@@ -149,7 +150,7 @@ export default function HRVixChart({
               strokeWidth={1.5}
               strokeDasharray="3 3"
               dot={false}
-              connectNulls={false}
+              connectNulls
               isAnimationActive={false}
             />
           </ComposedChart>
