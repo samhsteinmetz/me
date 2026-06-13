@@ -16,6 +16,7 @@ import {
 } from "./vitals/analysis";
 import HRVixChart from "./vitals/HRVixChart";
 import CoffeeSection from "./vitals/CoffeeSection";
+import SleepSection from "./vitals/SleepSection";
 import StatsSection from "./vitals/StatsSection";
 
 const INK = "#1A1916";
@@ -40,11 +41,13 @@ export default function VitalsPanel() {
   const {
     hrData,
     vixData,
+    sleepData,
     coffeeData,
     intradayByDate,
     loading,
     hrError,
     hrAuthError,
+    sleepError,
     coffeeError,
   } = useVitalsData();
 
@@ -216,6 +219,29 @@ export default function VitalsPanel() {
               coffeeData={coffeeData}
               response={response}
               coffeeError={coffeeError}
+            />
+          )}
+
+          <hr style={{ borderColor: "rgba(26,25,22,0.1)", margin: "20px 0" }} />
+
+          {/* Sleep */}
+          {loading ? (
+            <section>
+              <h3
+                className="font-serif"
+                style={{ fontSize: "0.9375rem", color: INK }}
+              >
+                Sleep
+              </h3>
+              <div className="mt-3">
+                <Fetching />
+              </div>
+            </section>
+          ) : (
+            <SleepSection
+              sleepData={sleepData}
+              sleepError={sleepError}
+              sleepAuthError={hrAuthError}
             />
           )}
 

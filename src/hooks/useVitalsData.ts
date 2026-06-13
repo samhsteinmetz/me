@@ -12,10 +12,12 @@ import {
   fetchCoffee,
   fetchHr,
   fetchIntraday,
+  fetchSleep,
   fetchVix,
   type CoffeeEntry,
   type HrPoint,
   type IntradayPoint,
+  type SleepNight,
   type VixPoint,
 } from "../lib/api";
 
@@ -33,6 +35,7 @@ export function localDateKey(iso: string): string {
 export interface VitalsData {
   hrData: HrPoint[];
   vixData: VixPoint[];
+  sleepData: SleepNight[];
   coffeeData: CoffeeEntry[];
   intradayByDate: Record<string, IntradayPoint[]>;
   loading: boolean;
@@ -41,6 +44,7 @@ export interface VitalsData {
   /** True when /api/hr returned 401 — Google Health token needs a refresh. */
   hrAuthError: boolean;
   vixError: string | null;
+  sleepError: string | null;
   coffeeError: string | null;
   refetch: () => void;
 }
@@ -48,6 +52,7 @@ export interface VitalsData {
 export function useVitalsData(): VitalsData {
   const [hrData, setHrData] = useState<HrPoint[]>([]);
   const [vixData, setVixData] = useState<VixPoint[]>([]);
+  const [sleepData, setSleepData] = useState<SleepNight[]>([]);
   const [coffeeData, setCoffeeData] = useState<CoffeeEntry[]>([]);
   const [intradayByDate, setIntradayByDate] = useState<
     Record<string, IntradayPoint[]>
@@ -56,6 +61,7 @@ export function useVitalsData(): VitalsData {
   const [hrError, setHrError] = useState<string | null>(null);
   const [hrAuthError, setHrAuthError] = useState(false);
   const [vixError, setVixError] = useState<string | null>(null);
+  const [sleepError, setSleepError] = useState<string | null>(null);
   const [coffeeError, setCoffeeError] = useState<string | null>(null);
 
   // Persistent cache of intraday HR keyed by date — survives refetches.
@@ -95,13 +101,15 @@ export function useVitalsData(): VitalsData {
     setLoading(true);
     setHrError(null);
     setVixError(null);
+    setSleepError(null);
     setCoffeeError(null);
     setHrAuthError(false);
 
-    // All three in parallel; allSettled so one failure doesn't reject the rest.
-    const [hrRes, vixRes, coffeeRes] = await Promise.allSettled([
+    // All in parallel; allSettled so one failure doesn't reject the rest.
+    const [hrRes, vixRes, sleepRes, coffeeRes] = await Promise.allSettled([
       fetchHr(),
       fetchVix(),
+      fetchSleep(),
       fetchCoffee(),
     ]);
 
@@ -117,6 +125,9 @@ export function useVitalsData(): VitalsData {
 
     if (vixRes.status === "fulfilled") setVixData(vixRes.value);
     else setVixError(vixRes.reason?.message || "Failed to load VIX data.");
+
+    if (sleepRes.status === "fulfilled") setSleepData(sleepRes.value);
+    else setSleepError(sleepRes.reason?.message || "Failed to load sleep data.");
 
     let coffee: CoffeeEntry[] = [];
     if (coffeeRes.status === "fulfilled") {
@@ -136,11 +147,12 @@ export function useVitalsData(): VitalsData {
     void load();
   }, [load]);
 
-  const error = hrError || vixError || coffeeError;
+  const error = hrError || vixError || sleepError || coffeeError;
 
   return {
     hrData,
     vixData,
+    sleepData,
     coffeeData,
     intradayByDate,
     loading,
@@ -148,6 +160,7 @@ export function useVitalsData(): VitalsData {
     hrError,
     hrAuthError,
     vixError,
+    sleepError,
     coffeeError,
     refetch: load,
   };

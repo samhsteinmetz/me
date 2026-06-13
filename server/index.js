@@ -10,6 +10,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth.js";
 import hrRoutes from "./routes/hr.js";
+import sleepRoutes from "./routes/sleep.js";
 import vixRoutes from "./routes/vix.js";
 import coffeeRoutes from "./routes/coffee.js";
 import { hasDb } from "./db.js";
@@ -56,6 +57,7 @@ app.use("/", authRoutes);
 
 // hr routes include both /api/hr and /api/hr-intraday.
 app.use("/api", hrRoutes);
+app.use("/api", sleepRoutes);
 app.use("/api/vix", vixRoutes);
 app.use("/api/coffee", coffeeRoutes);
 

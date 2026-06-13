@@ -24,6 +24,21 @@ export interface IntradayPoint {
   time: string; // "HH:MM:SS"
   value: number;
 }
+export interface SleepStages {
+  deep: number; // minutes
+  rem: number;
+  light: number;
+  awake: number;
+}
+export interface SleepNight {
+  date: string; // "YYYY-MM-DD" — civil wake date
+  asleepMinutes: number;
+  inBedMinutes: number;
+  efficiency: number | null; // 0–100
+  stages: SleepStages;
+  bedtime: string | null; // "HH:MM" local
+  waketime: string | null; // "HH:MM" local
+}
 
 /** Error carrying the HTTP status so callers can special-case 401 (auth). */
 export class ApiError extends Error {
@@ -44,6 +59,7 @@ async function getJson<T>(path: string): Promise<T> {
 
 export const fetchHr = () => getJson<HrPoint[]>("/api/hr");
 export const fetchVix = () => getJson<VixPoint[]>("/api/vix");
+export const fetchSleep = () => getJson<SleepNight[]>("/api/sleep");
 export const fetchCoffee = () => getJson<CoffeeEntry[]>("/api/coffee");
 export const fetchIntraday = (date: string) =>
   getJson<IntradayPoint[]>(`/api/hr-intraday?date=${encodeURIComponent(date)}`);
