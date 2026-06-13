@@ -162,15 +162,24 @@ router.get("/hr", async (req, res) => {
     const filter = `daily_resting_heart_rate.date >= "${start}"`;
     const points = await listAllDataPoints("daily-resting-heart-rate", filter);
 
-    const series = points
-      .map((dp) => {
-        const rhr = dp.dailyRestingHeartRate || {};
-        return {
-          date: civilDateToYmd(rhr.date),
-          restingHR: toNumber(rhr.beatsPerMinute),
-        };
-      })
-      .filter((row) => row.date && row.restingHR != null && row.restingHR !== 0)
+    // The API can return multiple resting-HR points per day (one per data
+    // source/device). Collapse to a single averaged value per date.
+    const byDate = new Map();
+    for (const dp of points) {
+      const rhr = dp.dailyRestingHeartRate || {};
+      const date = civilDateToYmd(rhr.date);
+      const v = toNumber(rhr.beatsPerMinute);
+      if (!date || v == null || v === 0) continue;
+      const cur = byDate.get(date) || { sum: 0, count: 0 };
+      cur.sum += v;
+      cur.count += 1;
+      byDate.set(date, cur);
+    }
+    const series = [...byDate.entries()]
+      .map(([date, { sum, count }]) => ({
+        date,
+        restingHR: Math.round(sum / count),
+      }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     res.set("X-Data-Source", "google-health");
@@ -210,12 +219,21 @@ router.get("/hr-intraday", async (req, res) => {
       `AND heart_rate.sample_time.civil_time < "${next}T00:00:00"`;
     const points = await listAllDataPoints("heart-rate", filter, 10000);
 
-    const series = points
-      .map((dp) => {
-        const hr = dp.heartRate || {};
-        return { time: sampleClock(hr.sampleTime), value: toNumber(hr.beatsPerMinute) };
-      })
-      .filter((row) => row.time && row.value != null)
+    // The API returns dense, sub-minute, multi-source samples. Aggregate to a
+    // single averaged BPM per "HH:MM" so the chart gets clean per-minute data.
+    const byMinute = new Map();
+    for (const dp of points) {
+      const hr = dp.heartRate || {};
+      const time = sampleClock(hr.sampleTime);
+      const v = toNumber(hr.beatsPerMinute);
+      if (!time || v == null) continue;
+      const cur = byMinute.get(time) || { sum: 0, count: 0 };
+      cur.sum += v;
+      cur.count += 1;
+      byMinute.set(time, cur);
+    }
+    const series = [...byMinute.entries()]
+      .map(([time, { sum, count }]) => ({ time, value: Math.round(sum / count) }))
       .sort((a, b) => a.time.localeCompare(b.time));
 
     cacheSet(date, series);
