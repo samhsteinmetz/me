@@ -2,217 +2,227 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+ * iA Writer Quattro — body / UI typeface
+ *
+ * Self-hosted from the iA fonts repo (https://github.com/iaolo/iA-Fonts).
+ * Drop the four `.woff2` files into `public/fonts/` to activate the
+ * branded face. Until then, the fallback stack (Helvetica Neue, Arial)
+ * renders cleanly enough to keep the system on-brand visually.
+ * ------------------------------------------------------------------------- */
+@font-face {
+  font-family: "iA Writer Quattro";
+  src: url("/fonts/iAWriterQuattroS-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "iA Writer Quattro";
+  src: url("/fonts/iAWriterQuattroS-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "iA Writer Quattro";
+  src: url("/fonts/iAWriterQuattroS-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "iA Writer Quattro";
+  src: url("/fonts/iAWriterQuattroS-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------------------
+ * Design tokens
+ * ------------------------------------------------------------------------- */
+:root {
+  --color-paper: #fafaf8;
+  --color-paper-edge: #f2f2ee;
+  --color-ink: #1b1f26;
+  --color-ink-soft: #4d525b;
+  --color-ink-muted: #888c94;
+  --color-rule: #d5d6d9;
+  --color-rule-faint: #e5e6e8;
+  --color-accent: #3f5a82;
+  --color-accent-soft: rgba(63, 90, 130, 0.12);
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------------------- */
 @layer base {
   html {
-    font-family: 'Playfair Display', serif;
+    font-family: "iA Writer Quattro", "Söhne", "Helvetica Neue", Arial,
+      ui-sans-serif, sans-serif;
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
-}
 
-@keyframes gradient-slide {
-  0% {
-    background-position: 0% center;
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
-  100% {
-    background-position: 100% center;
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-ink);
   }
-}
 
-
-.card {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  background: lightgrey;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-  transition: all 1s ease-in-out;
-}
-
-.background {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 100% 107%, #42bd8a 0%, #11a640 30%, #186c3f 60%, #70d29f 100%);
-}
-
-.logo {
-  position: absolute;
-  right: 50%;
-  bottom: 50%;
-  transform: translate(50%, 50%);
-  transition: all 0.6s ease-in-out;
-}
-
-.logo .logo-svg {
-  fill: white;
-  width: 30px;
-  height: 30px;
-}
-
-.icon {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-}
-
-.icon .svg {
-  fill: rgba(255, 255, 255, 0.797);
-  width: 100%;
-  transition: all 0.5s ease-in-out;
-}
-
-.box {
-  position: absolute;
-  padding: 10px;
-  text-align: right;
-  background: rgba(255, 255, 255, 0.389);
-  border-top: 2px solid rgb(255, 255, 255);
-  border-right: 1px solid white;
-  border-radius: 10% 13% 42% 0%/10% 12% 75% 0%;
-  box-shadow: rgba(100, 100, 111, 0.364) -7px 7px 29px 0px;
-  transform-origin: bottom left;
-  transition: all 1s ease-in-out;
-}
-
-.box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  transition: all 0.5s ease-in-out;
-}
-
-.box:hover .svg {
-  fill: white;
-}
-
-.box1 {
-  width: 70%;
-  height: 70%;
-  bottom: -70%;
-  left: -70%;
-}
-
-.box1::before {
-  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #ff53d4 60%, #62c2fe 90%);
-}
-
-.box1:hover::before {
-  opacity: 1;
-}
-
-.box1:hover .icon .svg {
-  filter: drop-shadow(0 0 5px white);
-}
-
-.box2 {
-  width: 50%;
-  height: 50%;
-  bottom: -50%;
-  left: -50%;
-  transition-delay: 0.2s;
-}
-
-.box2::before {
-  background: radial-gradient(circle at 30% 107%, #91e9ff 0%, #00ACEE 90%);
-}
-
-.box2:hover::before {
-  opacity: 1;
-}
-
-.box2:hover .icon .svg {
-  filter: drop-shadow(0 0 5px white);
-}
-
-.box3 {
-  width: 30%;
-  height: 30%;
-  bottom: -30%;
-  left: -30%;
-  transition-delay: 0.4s;
-}
-
-.box3::before {
-  background: radial-gradient(circle at 30% 107%, #969fff 0%, #b349ff 90%);
-}
-
-.box3:hover::before {
-  opacity: 1;
-}
-
-.box3:hover .icon .svg {
-  filter: drop-shadow(0 0 5px white);
-}
-
-.box4 {
-  width: 10%;
-  height: 10%;
-  bottom: -10%;
-  left: -10%;
-  transition-delay: 0.6s;
-}
-
-.card:hover {
-  transform: scale(1.1);
-}
-
-.card:hover .box {
-  bottom: -1px;
-  left: -1px;
-}
-
-.card:hover .logo {
-  transform: translate(0, 0);
-  bottom: 20px;
-  right: 20px;
-}
-
-
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+  /* Body links: accent color, soft underline that warms on hover.
+     Nav and footer links opt out via .link-bare or .link-nav. */
+  a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-soft);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 120ms var(--ease-out-quart),
+      color 120ms var(--ease-out-quart);
   }
+
   a:hover {
-    color: #747bff;
+    text-decoration-color: var(--color-accent);
   }
-  button {
-    background-color: #f9f9f9;
+
+  a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--color-rule);
+    margin-block: 2.5rem;
+  }
+
+  /* Reset overlong tap target outlines on mouse / touch, keep on keyboard */
+  button:focus,
+  [role="button"]:focus {
+    outline: none;
+  }
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Components — local patterns. Kept minimal; new patterns must earn their
+ * place by appearing in DESIGN.md before they appear here.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  /* The notebook content column. At small viewports we keep 1.5rem of
+     margin on each side; at md+ the margin grows to ≥4rem; at xl+ it
+     reaches the full notebook 6rem each side. */
+  .container-prose {
+    width: min(72ch, 100% - 3rem);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 768px) {
+    .container-prose {
+      width: min(72ch, 100% - 8rem);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-prose {
+      width: min(72ch, 100% - 12rem);
+    }
+  }
+
+  /* Notebook photo frame: 1px ruled border, small padding, no radius */
+  .photo-frame {
+    border: 1px solid var(--color-rule);
+    padding: 0.5rem;
+    background: var(--color-paper);
+    display: inline-block;
+    max-width: 100%;
+  }
+  .photo-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Nav variant: bare link, no underline, color shifts on hover and current page */
+  .link-nav {
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color 120ms var(--ease-out-quart);
+  }
+  .link-nav:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .link-nav[aria-current="page"] {
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--color-accent-soft);
+    padding-bottom: 1px;
+    margin-bottom: -1px;
+    text-decoration: none;
+  }
+
+  /* Inline link that wants to stay ink color (rare; used in the wordmark) */
+  .link-bare {
+    color: inherit;
+    text-decoration: none;
+  }
+  .link-bare:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  /* Notebook list: em-dash bullet instead of disc */
+  .list-notebook {
+    list-style: none;
+    padding-left: 0;
+  }
+  .list-notebook > li {
+    position: relative;
+    padding-left: 1.6em;
+  }
+  .list-notebook > li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--color-ink-soft);
+    font-feature-settings: "tnum" 1;
+  }
+  .list-notebook > li + li {
+    margin-top: 0.5rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

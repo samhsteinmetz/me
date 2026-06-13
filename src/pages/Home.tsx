@@ -1,346 +1,242 @@
-// src/pages/Home.tsx
-import { motion } from "framer-motion"
-import { cn } from "../utils/classes"
-import { GradualSpacing } from "../components/shared/spacing"
-import thisImage from "../assets/me.jpeg"
-import Card from "../components/ProjectCard";
-import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Link } from "react-router-dom";
+import meImage from "../assets/me.jpeg";
+import groupImage from "../assets/group.jpeg";
+import catImage from "../assets/cat.jpeg";
 
 const Home = () => {
-  
+  const shouldReduceMotion = useReducedMotion();
 
-    const navigate = useNavigate();
-    const projects = ["StackOverFlow",  "HackBeanpot", "TeamJobs", "Twitter Asks"];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [ipAddress, setIpAddress] = useState<string>("");
-    const colors = [
-        '#3498db', // Blue
-        '#9b59b6', // Purple
-        '#e74c3c', // Red
-        '#f39c12', // Orange
-        '#2ecc71', // Green
-        '#1abc9c'  // Teal
-      ];
-
-      useEffect(() => {
-        const fetchIpAddress = async () => {
-          try {
-            // Using ipify to fetch IP address
-            const response = await axios.get("https://api.ipify.org?format=json");
-            setIpAddress(response.data.ip);
-            try {
-              const response = await fetch(
-                "https://673dfa030118dbfe86099e55.mockapi.io/resume/v1/expereince",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ ip: ipAddress, date: new Date().toISOString()}),
-                }
-              );
-
-              if (!response.ok) {
-                throw new Error("Failed to submit form");
-              }
-
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const result = await response.json();
-              console.log(result);
-              
-
-
-
-
-            } catch (error) {
-              console.error("Error submitting form:", error);
-            }
-            console.log(ipAddress);
-          } catch (error) {
-            console.error("Error fetching address:", error);
-          }
-        };
-    
-        fetchIpAddress();
-      },);
-    
-      
-    return (
-        <div className="py-12 px-8">
-      <div className={cn("flex flex-col gap-16 w-full", "px-8 sm:px-8 lg:px-6")}>
-        {/* Hero Section */}
-        <GradualSpacing />
-  
-        {/* About Preview */}
-        <motion.section
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className={cn(
-            "grid grid-cols-1 md:grid-cols-2 gap-8",
-            "items-center w-full"
-          )}
-        >
-       <div className="space-y-4">
-  <div className="flex justify-center items-center w-full">
-    <h2 className={cn(
-      "text-3xl font-bold",
-      "bg-gradient-to-r from-green-300 via-green-400 to-green-300",
-      "bg-clip-text text-transparent",
-      "border-b-2 border-green-500/20 pb-2",
-      "inline-block"
-    )}>
-      About Me
-    </h2>
-  </div>
-  <div className={cn(
-    "p-6 rounded-3xl",
-    "border-2 border-green-500/20",
-    "backdrop-blur-sm bg-black/30",
-    "hover:border-green-500/40 transition-colors"
-  )}>
-    <p className="text-lg">
-      <strong>Hi!</strong>
-      <br />
-      I'm Samuel Steinmetz a computer science student at Northeastern University. 
-      I'm a junior dual majoring in finance and computer science. I enjoy software, numbers, and entreprenuership.
-      In my spare time I enjoy playing basketball, playing board games, and playing my banjo.
-    </p>
-  </div>
-</div>
-            <img
-              src={thisImage}
-              alt="Profile"
-              className="w-full h-auto object-cover rounded-full"
-            />
-        </motion.section>
-
-{/* Education Section */}
-{/* Skills Section */}
-<motion.section
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className="w-full space-y-6"
->
-  <h2 className="text-3xl font-bold text-center">Skills</h2>
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    {[
-      "JavaScript",
-      "TypeScript",
-      "React",
-      "Node.js",
-      "Python",
-      "Git",
-      "SQL",
-      "JAVA",
-      "C/C++",
-
-    ].map((skill) => (
-      <motion.div
-        key={skill}
-        whileHover={{ scale: 1.05 }}
-        className={cn(
-          "p-4 rounded-lg",
-          "border border-green-500/20",
-          "backdrop-blur-sm bg-black/30",
-          "text-center"
-        )}
-      >
-        <span className="text-lg font-medium">{skill}</span>
-      </motion.div>
-    ))}
-  </div>
-</motion.section>
-  
-        {/* Projects Preview */}
-        <motion.section
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className="space-y-8 w-full"
->
-  <h2 className="text-3xl font-bold text-center">Featured Projects</h2>
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {projects.map((project, index) => (
-      <Card 
-        key={project} 
-        title={project} 
-        para="" 
-        baseColor={colors[index % colors.length]} 
-      />
-    ))}
-  </div>
-</motion.section>
-
-{/* Software Experience Section */}
-<motion.section
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className={cn(
-    "w-full",
-    "p-6 rounded-lg",
-    "border-2 border-green-500/20",
-    "backdrop-blur-sm bg-black/30",
-    "hover:border-green-500/40 transition-colors"
-  )}
->
-  <h2 className="text-3xl font-bold mb-6 text-green-400">Software Experience</h2>
-  <div className="space-y-8">
-    {/* Teaching Assistant */}
-    <div>
-      <div className="border-l-2 border-red-500/40 pl-4">
-        <h3 className="text-xl font-semibold text-red-500">Teaching Assistant - Object-Oriented Development</h3>
-        <p className="text-lg text-white">Northeastern University | Part-time + Full-time</p>
-        <p className="text-sm text-white/80">Sep 2024 – Dec 2024</p>
-      </div>
-      <ul className="list-disc pl-8 text-white/80">
-        <li>Led lab sessions on design patterns, reinforcing concepts like abstraction, modularity, code reuse, and agile programming.</li>
-        <li>Graded assignments with a focus on design patterns, inheritance, encapsulation, and ensuring clean Java code.</li>
-        <li>Assisted students during office hours with JUnit, Java, design patterns, and debugging.</li>
-      </ul>
-    </div>
-
-    {/* CX Co-op */}
-    <div>
-      <div className="border-l-2 border-blue-500/40 pl-4">
-        <h3 className="text-xl font-semibold text-blue-500">CX Co-op: Technical Support Engineer and IT Intern</h3>
-        <p className="text-lg text-white">Panorama Education | Fulltime Internship</p>
-        <p className="text-sm text-white/80">Jan 2024 – Dec 2024</p>
-      </div>
-      <ul className="list-disc pl-8 text-white/80">
-        <li>Resolved a queue of 10,000+ customer-facing issues by troubleshooting incidents and addressing user inquiries.</li>
-        <li>Collaborated with UX and Engineering teams to audit and improve platform usability and functionality.</li>
-        <li>Implemented survey auditing solutions and ensured secure, efficient data transfers for hundreds of clients.</li>
-        <li>Conducted a comprehensive audit of 30+ product education resources to ensure quality UX.</li>
-      </ul>
-    </div>
-
-    {/* Software Developer */}
-    <div>
-      <div className="border-l-2 border-teal-500/40 pl-4">
-        <h3 className="text-xl font-semibold text-teal-500">Software Developer Co-op</h3>
-        <p className="text-lg text-white">MHCPS | Full-time Internship</p>
-        <p className="text-sm text-white/80">Jan 2025 – May 2025</p>
-      </div>
-      <ul className="list-disc pl-8 text-white/80">
-        <li>working on developing a campus wide parking application and internal tool using id badges</li>
-        <li>deploying and moving microservices from hosted servers to azure cloud</li>
-        <li>team development of a streamlined document and transcript generating application using ellucian colleague database</li>
-      </ul>
-    </div>
-  </div>
-</motion.section>
-
-{/* Education Section */}
-<motion.section
-  initial={{ opacity: 0, x: 20 }}
-  whileInView={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.6 }}
-  className={cn(
-    "w-full",
-    "p-6 rounded-lg",
-    "border-2 border-green-500/20", // Changed to green border
-    "backdrop-blur-sm bg-black/30",
-    "hover:border-green-500/40 transition-colors" // Changed hover to green
-  )}
->
-  <h2 className="text-3xl font-bold mb-6 text-green-400">Education</h2>
-  <div className="space-y-4">
-    <div className="border-l-2 border-[#D41B2C]/40 pl-4">
-      <h3 className="text-xl font-semibold text-[#D41B2C]">Northeastern University</h3>
-      <p className="text-lg text-white">Bachelor of Science in Computer Science and Finance + minor in Math</p>
-      <p className="text-sm text-white/80">2022 - 2026</p>
-    </div>
-  </div>
-  <div className="space-y-4">
-    <div className="border-l-2 border-blue-500/40 pl-4">
-      <h3 className="text-xl font-semibold text-blue-500">Gilman School</h3>
-      <p className="text-lg text-white">Highschool</p>
-      <p className="text-sm text-white/80">2018 - 2022</p>
-    </div>
-  </div>
-</motion.section>
-
-
-{/* General Work Experience Section */}
-<motion.section
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
-  className={cn(
-    "w-full",
-    "p-6 rounded-lg",
-    "border-2 border-green-500/20",
-    "backdrop-blur-sm bg-black/30",
-    "hover:border-green-500/40 transition-colors"
-  )}
->
-  <h2 className="text-3xl font-bold mb-6 text-green-400">General Work Experience</h2>
-  <div className="space-y-8">
-    {/* Barista */}
-    <div>
-      <div className="border-l-2 border-orange-500/40 pl-4">
-        <h3 className="text-xl font-semibold text-orange-500">Barista</h3>
-        <p className="text-lg text-white">Pure Raw Juice | Part-time</p>
-        <p className="text-sm text-white/80">Jun 2022 – Jan 2023 (8 months)</p>
-      </div>
-      <ul className="list-disc pl-8 text-white/80">
-        <li>Blended smoothies and bowls using a variety of fruits, vegetables, and superfoods.</li>
-        <li>Prepared cold-pressed coffee and cashew milk, ensuring high-quality standards.</li>
-        <li>Safely handled food and managed customer service at the register.</li>
-      </ul>
-    </div>
-
-    {/* Data Operation Intern */}
-    <div>
-      <div className="border-l-2 border-red-500/40 pl-4">
-        <h3 className="text-xl font-semibold text-red-500">Data Operation Intern</h3>
-        <p className="text-lg text-white">Deli Brands of America | Internship</p>
-        <p className="text-sm text-white/80">Jul 2021 – Aug 2021 (2 months)</p>
-      </div>
-      <ul className="list-disc pl-8 text-white/80">
-        <li>Collected time data for meat-packing production operations.</li>
-        <li>Analyzed ERP system data to make it accessible for research and development.</li>
-      </ul>
-    </div>
-  </div>
-</motion.section>
-
-
-  
-        {/* Contact CTA */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          className={cn(
-            "text-center space-y-4 w-full",
-            "p-8 rounded-lg",
-            "border border-green-500/20",
-            "backdrop-blur-sm bg-black/30"
-          )}
-        >
-          <h2 className="text-3xl font-bold">Let's Connect</h2>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={cn(
-              "px-6 py-2 rounded-lg",
-              "bg-green-500 text-black",
-              "hover:bg-green-400 transition-colors"
-            )}
-            onClick={() => {navigate('/contact')}}
-          >
-            Get in Touch
-          </motion.button>
-        </motion.section>
-      </div>
-      </div>
-    );
+  // One entrance, 600ms, ease-out-expo. Disabled under reduced-motion.
+  const fadeIn = {
+    initial: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+    },
   };
-  
 
-export default Home
+  return (
+    <motion.div {...fadeIn} className="container-prose">
+      {/* ----- Hero ------------------------------------------------------- */}
+      <section className="pt-8 sm:pt-12 md:pt-16">
+        <h1 className="font-serif text-display font-semibold text-balance">
+          Samuel Steinmetz
+        </h1>
+        <p className="mt-5 text-ink-soft text-balance max-w-measure">
+          Computer science and finance at Northeastern University, graduating
+          2026.
+        </p>
+      </section>
+
+      {/* ----- Intro + currently ----------------------------------------- */}
+      <section className="mt-12 md:mt-16">
+        <div className="md:flex md:items-start md:gap-10">
+          <div className="md:flex-1">
+            <p className="text-pretty">
+              I&rsquo;m in my final year at Northeastern, studying computer
+              science and finance. My favorite parts of software are the seams
+              — APIs, integrations, the places where one team&rsquo;s
+              assumptions meet another&rsquo;s. Most days I&rsquo;m writing
+              TypeScript or Python.
+            </p>
+          </div>
+          <figure className="mt-6 md:mt-1 md:w-44 md:flex-shrink-0">
+            <span className="photo-frame">
+              <img
+                src={meImage}
+                alt="Samuel Steinmetz"
+                loading="eager"
+                decoding="async"
+              />
+            </span>
+          </figure>
+        </div>
+
+        <p className="mt-10 text-ink-soft">Right now:</p>
+        <ul className="list-notebook mt-2">
+          <li>
+            Software engineering intern at Ironclad, working on AI.
+          </li>
+          <li>
+            Reading about Model Context Protocol and what it means for how
+            applications get written.
+          </li>
+        </ul>
+      </section>
+
+      <hr />
+
+      {/* ----- Selected work --------------------------------------------- */}
+      <section aria-labelledby="selected-work-heading">
+        <h2
+          id="selected-work-heading"
+          className="font-serif text-h2 font-medium text-balance"
+        >
+          Selected work
+        </h2>
+
+        <div className="mt-8 space-y-12">
+          <article>
+            <h3 className="font-sans text-h3 font-semibold">DiscountBytes</h3>
+            <p className="mt-2 text-pretty">
+              Co-built a restaurant menu that prices itself: foot-traffic
+              cameras feed a vision model, the model feeds the menu, the menu
+              re-prints with new numbers. Won MLH and HackBeanPot awards.
+            </p>
+            <figure className="mt-5">
+              <span className="photo-frame max-w-md">
+                <img
+                  src={groupImage}
+                  alt="The HackBeanPot 2024 team at the closing ceremony."
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <figcaption className="mt-2 font-mono text-mono text-ink-soft">
+                The team at HackBeanPot 2024.
+              </figcaption>
+            </figure>
+            <p className="mt-4 font-mono text-mono text-ink-soft">
+              2024 &middot; Python, Flask, React, Firebase &middot; team of 4
+            </p>
+          </article>
+
+          <article>
+            <h3 className="font-sans text-h3 font-semibold">Twitter Asks</h3>
+            <p className="mt-2 text-pretty">
+              A pipeline that pulled questions out of Twitter and answered them
+              with a fine-tuned GPT. Threaded responses generated async so the
+              page didn&rsquo;t block while the model thought. Built in 36
+              hours; first place at the Whitehall Hackathon.
+            </p>
+            <p className="mt-3 font-mono text-mono text-ink-soft">
+              2023 &middot; Python, Flask, Tweepy, OpenAI &middot; team of 4
+            </p>
+          </article>
+        </div>
+
+        <p className="mt-10">
+          <Link to="/projects">more on the projects page &rarr;</Link>
+        </p>
+      </section>
+
+      <hr />
+
+      {/* ----- Experience ------------------------------------------------- */}
+      <section aria-labelledby="experience-heading">
+        <h2
+          id="experience-heading"
+          className="font-serif text-h2 font-medium text-balance"
+        >
+          Experience
+        </h2>
+
+        <ul className="mt-8 space-y-6">
+          <li>
+            <p>
+              <span className="font-medium">
+                Software Engineering Intern
+              </span>{" "}
+              <span className="text-ink-soft">&middot; Ironclad</span>
+            </p>
+            <p className="mt-1 font-mono text-mono text-ink-soft">
+              Summer 2026 &middot; present
+            </p>
+          </li>
+
+          <li>
+            <p>
+              <span className="font-medium">Software Developer Co-op</span>{" "}
+              <span className="text-ink-soft">&middot; MHCPS</span>
+            </p>
+            <p className="mt-1 font-mono text-mono text-ink-soft">
+              Jan – May 2025
+            </p>
+            <p className="mt-2 text-ink-soft text-pretty">
+              Built a campus parking application and migrated internal
+              microservices from on-prem to Azure.
+            </p>
+          </li>
+
+          <li>
+            <p>
+              <span className="font-medium">
+                Technical Support Engineer Co-op
+              </span>{" "}
+              <span className="text-ink-soft">&middot; Panorama Education</span>
+            </p>
+            <p className="mt-1 font-mono text-mono text-ink-soft">
+              Jan – Dec 2024
+            </p>
+            <p className="mt-2 text-ink-soft text-pretty">
+              Worked through ten thousand customer-facing tickets and shipped
+              a survey-audit tool with UX and engineering.
+            </p>
+          </li>
+
+          <li>
+            <p>
+              <span className="font-medium">
+                Teaching Assistant, Object-Oriented Development
+              </span>{" "}
+              <span className="text-ink-soft">
+                &middot; Northeastern University
+              </span>
+            </p>
+            <p className="mt-1 font-mono text-mono text-ink-soft">
+              Sep – Dec 2024
+            </p>
+          </li>
+        </ul>
+      </section>
+
+      <hr />
+
+      {/* ----- Cat tax (the sign-off) ------------------------------------- */}
+      <aside className="mb-10">
+        <figure className="max-w-xs">
+          <span className="photo-frame">
+            <img
+              src={catImage}
+              alt="One of Sam's cats."
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
+          <figcaption className="mt-2 font-mono text-mono text-ink-soft">
+            Cat tax.
+          </figcaption>
+        </figure>
+      </aside>
+
+      {/* ----- Contact line ---------------------------------------------- */}
+      <footer className="pb-4">
+        <p className="font-mono text-mono text-ink-soft">
+          <a href="mailto:samhsteinmetz@gmail.com">
+            samhsteinmetz@gmail.com
+          </a>
+          {" · "}
+          <a
+            href="https://github.com/samhsteinmetz"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            github
+          </a>
+          {" · "}
+          <a
+            href="https://www.linkedin.com/in/samuel-heron-steinmetz/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            linkedin
+          </a>
+        </p>
+      </footer>
+    </motion.div>
+  );
+};
+
+export default Home;

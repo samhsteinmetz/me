@@ -1,7 +1,6 @@
-import { ReactNode } from 'react';
-import NavBar from './NavBar';
-import HackerBackground from '../shared/HackerBackground';
-import { cn } from '../../utils/classes';
+import { ReactNode } from "react";
+import NavBar from "./NavBar";
+import VitalsPanel from "../VitalsPanel";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,32 +8,18 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className={cn(
-      "min-h-screen w-full",
-      "flex flex-col",
-      "bg-gradient-to-b from-background to-background/80",
-      "overflow-hidden",
-      "relative"
-    )}>
-      <HackerBackground color="#0F0" fontSize={14} speed={1} />
+    <div className="min-h-screen bg-paper text-ink">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-paper focus:text-ink focus:px-3 focus:py-1 focus:border focus:border-rule focus:no-underline"
+      >
+        Skip to content
+      </a>
       <NavBar />
-
-      <main className={cn(
-        "flex-1 w-full",
-        "flex flex-col items-center",
-        "px-4 sm:px-6 lg:px-12",
-        "pt-24 pb-12",
-        "text-green-500",
-        "relative z-10",
-      )}>
-        <div className={cn(
-          "w-full max-w-5xl mx-auto",
-          "backdrop-blur-sm", // Add backdrop blur
-          "bg-stone-900/50" // Add semi-transparent background
-        )}>
-          {children}
-        </div>
+      <main id="main" className="pt-24 pb-24 md:pt-28 md:pb-32">
+        {children}
       </main>
+      <VitalsPanel />
     </div>
   );
 };
