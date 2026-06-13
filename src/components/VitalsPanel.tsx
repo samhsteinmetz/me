@@ -143,14 +143,19 @@ const VitalsPanel = () => {
       .finally(() => setLoading(false));
   }, [open, loaded, loading]);
 
-  // Esc to close.
+  // Esc to close, and return focus to the toggle when closing.
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    if (open) {
+      wasOpenRef.current = true;
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setOpen(false);
+      };
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }
+    if (wasOpenRef.current) {
+      toggleRef.current?.focus();
+    }
   }, [open]);
 
   const merged: MergedPoint[] = useMemo(() => {
