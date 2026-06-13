@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CartesianGrid,
   ComposedChart,
@@ -293,22 +286,17 @@ const VitalsPanel = () => {
           sits at the right edge of the viewport; when open, the tab sits
           at the left edge of the panel like a notebook bookmark. */}
       <div
-        ref={(el) => {
-          // capture for focus management later if needed
-          if (el && panelRef.current !== (el as unknown as HTMLElement)) {
-            // no-op: ref stored implicitly via panel
-          }
-        }}
         className="fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] pointer-events-none"
         style={{
           transform: open ? "translate3d(0,0,0)" : "translate3d(100%,0,0)",
           transition: "transform 300ms cubic-bezier(0.25,1,0.5,1)",
-          willChange: "transform",
         }}
       >
         {/* Tab — absolutely positioned just outside the wrapper to the left.
-            Visible whether the panel is open or closed. */}
+            Visible whether the panel is open or closed. Padded generously
+            so the tap area clears 44px on mobile. */}
         <button
+          ref={toggleRef}
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
@@ -318,7 +306,7 @@ const VitalsPanel = () => {
             "absolute top-1/2 right-full -translate-y-1/2",
             "pointer-events-auto",
             "bg-paper border border-rule border-r-0",
-            "px-2 py-4",
+            "px-2.5 py-5",
             "text-mono font-mono",
             "text-ink-soft hover:text-accent",
             "transition-colors duration-100",
@@ -334,12 +322,13 @@ const VitalsPanel = () => {
           </span>
         </button>
 
-        {/* Panel */}
+        {/* Panel — `inert` removes everything inside from focus + a11y tree
+            when closed, so Tab doesn't land on hidden form fields. */}
         <aside
-          ref={panelRef}
           id="vitals-panel"
           aria-label="Vitals"
           aria-hidden={!open}
+          {...(!open ? { inert: "" } : {})}
           className={[
             "h-full bg-paper border-l border-rule",
             "pointer-events-auto",
@@ -360,7 +349,11 @@ const VitalsPanel = () => {
 
           {error && !loading && (
             <p className="mt-6 text-small text-ink-soft">
-              couldn&rsquo;t load: <span className="font-mono">{error}</span>
+              Couldn&rsquo;t reach the vitals service. Check that the backend
+              is running and that <span className="font-mono">VITE_API_BASE_URL</span>{" "}
+              points at it.
+              <br />
+              <span className="font-mono text-mono text-ink-muted">{error}</span>
             </p>
           )}
 
@@ -475,16 +468,33 @@ const VitalsPanel = () => {
                     ? `You and the market agreed ${agreeDays.agree} of the last ${agreeDays.pairs} days.`
                     : "Not enough overlap to compute a correlation."}
                 </p>
-                <p className="mt-1 font-mono text-mono text-ink-muted">
-                  <span className="inline-block w-3 align-middle border-t border-ink mr-1" />
-                  hr{"  "}
-                  <span
-                    className="inline-block w-3 align-middle border-t border-accent ml-2 mr-1"
-                    style={{ borderStyle: "dashed" }}
-                  />
-                  vix{"  "}
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-ink ml-2 mr-1 align-middle border border-paper" />
-                  coffee day
+                <p className="mt-2 font-mono text-mono text-ink-muted flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg width="14" height="6" aria-hidden="true">
+                      <line x1="0" y1="3" x2="14" y2="3" stroke="#1B1F26" strokeWidth="1.5" />
+                    </svg>
+                    hr
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg width="14" height="6" aria-hidden="true">
+                      <line
+                        x1="0"
+                        y1="3"
+                        x2="14"
+                        y2="3"
+                        stroke="#3F5A82"
+                        strokeWidth="1.5"
+                        strokeDasharray="3 3"
+                      />
+                    </svg>
+                    vix
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg width="8" height="8" aria-hidden="true">
+                      <circle cx="4" cy="4" r="3" fill="#1B1F26" stroke="#FAFAF8" strokeWidth="1" />
+                    </svg>
+                    coffee day
+                  </span>
                 </p>
               </section>
 
