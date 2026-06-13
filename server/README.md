@@ -138,7 +138,7 @@ works.
   env var mints a fresh access token whenever the API returns 401. All OAuth
   logic lives in `googleHealth.js` and is shared by every route.
 - **Data type naming** quirk: kebab-case in the URL path (`heart-rate`,
-  `daily-resting-heart-rate`) but camelCase field + snake_case sub-paths in
-  filters (`heartRate.sample_time.civil_time`, `dailyRestingHeartRate.date`).
+  `daily-resting-heart-rate`) but snake_case in filters
+  (`heart_rate.sample_time.civil_time`, `daily_resting_heart_rate.date`).
 - `POST /api/coffee` strips HTML from `notes`, caps it at 200 chars, and
   validates `timestamp` is a valid ISO date.

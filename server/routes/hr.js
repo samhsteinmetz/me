@@ -138,8 +138,18 @@ function mockIntraday(date) {
 
 // ---- routes ----------------------------------------------------------------
 
+// On a failed upstream call, surface the raw error only when ?debug=1 is set.
+function sendError(req, res, err, fallback) {
+  if (err.status === 401) {
+    return res.status(401).json({ error: "Google Health token expired" });
+  }
+  const body = { error: fallback };
+  if (req.query.debug) body.detail = err.message;
+  res.status(err.status || 502).json(body);
+}
+
 // GET /api/hr → [{ date, restingHR }]  (0/null days filtered out, sorted asc)
-router.get("/hr", async (_req, res) => {
+router.get("/hr", async (req, res) => {
   if (useMock()) {
     res.set("X-Data-Source", "mock");
     return res.json(mockRestingHr(30));
@@ -147,8 +157,9 @@ router.get("/hr", async (_req, res) => {
 
   try {
     const start = ymd(daysAgo(30));
-    // Daily-summary filter pattern: `{dataType}.date >= "YYYY-MM-DD"`.
-    const filter = `dailyRestingHeartRate.date >= "${start}"`;
+    // Daily-summary filter pattern: `{data_type}.date >= "YYYY-MM-DD"`.
+    // The data-type token is snake_case (verified against the live API).
+    const filter = `daily_resting_heart_rate.date >= "${start}"`;
     const points = await listAllDataPoints("daily-resting-heart-rate", filter);
 
     const series = points
@@ -165,11 +176,8 @@ router.get("/hr", async (_req, res) => {
     res.set("X-Data-Source", "google-health");
     res.json(series);
   } catch (err) {
-    if (err.status === 401) {
-      return res.status(401).json({ error: "Google Health token expired" });
-    }
     console.error("[/api/hr]", err.message);
-    res.status(502).json({ error: "Failed to load heart rate data" });
+    sendError(req, res, err, "Failed to load heart rate data");
   }
 });
 
@@ -195,10 +203,11 @@ router.get("/hr-intraday", async (req, res) => {
 
   try {
     const next = ymd(new Date(new Date(`${date}T00:00:00Z`).getTime() + 86400000));
-    // Heart rate is a SAMPLE type → filter on sample_time.civil_time.
+    // Heart rate is a SAMPLE type → filter on sample_time.civil_time. The
+    // data-type token is snake_case (verified against the live API).
     const filter =
-      `heartRate.sample_time.civil_time >= "${date}T00:00:00" ` +
-      `AND heartRate.sample_time.civil_time < "${next}T00:00:00"`;
+      `heart_rate.sample_time.civil_time >= "${date}T00:00:00" ` +
+      `AND heart_rate.sample_time.civil_time < "${next}T00:00:00"`;
     const points = await listAllDataPoints("heart-rate", filter, 10000);
 
     const series = points
@@ -213,11 +222,8 @@ router.get("/hr-intraday", async (req, res) => {
     res.set("X-Data-Source", "google-health");
     res.json(series);
   } catch (err) {
-    if (err.status === 401) {
-      return res.status(401).json({ error: "Google Health token expired" });
-    }
     console.error("[/api/hr-intraday]", err.message);
-    res.status(502).json({ error: "Failed to load intraday heart rate" });
+    sendError(req, res, err, "Failed to load intraday heart rate");
   }
 });
 
