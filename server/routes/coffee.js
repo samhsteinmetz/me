@@ -1,14 +1,14 @@
 // routes/coffee.js — coffee log CRUD.
 //
 //   GET  /api/coffee  → [{ id, timestamp, notes }]  (most recent first, public)
-//   POST /api/coffee  → insert one entry (Firebase auth required)
+//   POST /api/coffee  → insert one entry (requires COFFEE_WRITE_TOKEN)
 //
 // Falls back to an in-memory store when DATABASE_URL is missing so the panel
 // works end-to-end in local dev without Postgres.
 
 import { Router } from "express";
 import { getPool, hasDb } from "../db.js";
-import { verifyFirebaseToken } from "../middleware/auth.js";
+import { verifyWriteToken } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -74,8 +74,8 @@ router.get("/", async (_req, res) => {
   }
 });
 
-// POST /api/coffee — requires a valid Firebase ID token.
-router.post("/", verifyFirebaseToken, async (req, res) => {
+// POST /api/coffee — requires the COFFEE_WRITE_TOKEN bearer secret.
+router.post("/", verifyWriteToken, async (req, res) => {
   const ts = req.body?.timestamp;
   if (typeof ts !== "string" || Number.isNaN(Date.parse(ts))) {
     return res.status(400).json({ error: "Invalid timestamp (ISO required)" });

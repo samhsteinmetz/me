@@ -10,7 +10,7 @@ It fronts three data sources so the React frontend never sees an API key:
 | `GET /api/hr-intraday`    | Google Health per-minute HR  | none (public)   |
 | `GET /api/vix`            | Yahoo Finance (`^VIX`)       | none (public)   |
 | `GET /api/coffee`         | Postgres `coffee_logs`       | none (public)   |
-| `POST /api/coffee`        | Postgres `coffee_logs`       | Firebase ID token |
+| `POST /api/coffee`        | Postgres `coffee_logs`       | `COFFEE_WRITE_TOKEN` |
 | `GET /auth/google`        | OAuth consent redirect       | none (one-time) |
 | `GET /auth/google/callback` | OAuth code → tokens        | none (one-time) |
 
@@ -30,7 +30,15 @@ POST /api/coffee      ← { "timestamp": "<ISO>", "notes": "optional" }
                       → { "success": true, "entry": { "id", "timestamp", "notes" } }
 ```
 
-`POST /api/coffee` requires `Authorization: Bearer <firebase-id-token>`.
+`POST /api/coffee` requires `Authorization: Bearer <COFFEE_WRITE_TOKEN>` — a
+private secret kept off the public site. Log a cup from anywhere with:
+
+```bash
+curl -X POST https://<your-host>/api/coffee \
+  -H "Authorization: Bearer $COFFEE_WRITE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"timestamp":"'"$(date -u +%FT%TZ)"'","notes":"double espresso"}'
+```
 
 ## Local development
 
@@ -89,27 +97,28 @@ heroku run npm run db:init --app samhsteinmetz-vitals-api
 Scopes requested (read-only): `googlehealth.activity_and_fitness`,
 `googlehealth.health_metrics_and_measurements`, `googlehealth.sleep`.
 
-### 5. Get the Firebase service-account JSON
+### 5. Generate the coffee write token
 
-1. [Firebase Console](https://console.firebase.google.com/) → your project →
-   **Project Settings → Service accounts**.
-2. **Generate new private key** → downloads a JSON file.
-3. You will paste the **entire file contents as one string** into the
-   `FIREBASE_SERVICE_ACCOUNT_JSON` config var (next step).
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-### 6. Set all Heroku config vars
+Save the output as `COFFEE_WRITE_TOKEN`. This is the only credential needed to
+POST coffee logs — keep it private (never put it in the frontend bundle).
+
+### 6. Set all config vars
 
 ```bash
 heroku config:set \
   ALLOWED_ORIGIN="https://samhsteinmetz.github.io" \
-  ALLOWED_EMAILS="samhsteinmetz@gmail.com" \
   GOOGLE_HEALTH_CLIENT_ID="..." \
   GOOGLE_HEALTH_CLIENT_SECRET="..." \
   GOOGLE_HEALTH_REFRESH_TOKEN="..." \
   GOOGLE_HEALTH_REDIRECT_URI="https://<your-host>/auth/google/callback" \
-  FIREBASE_SERVICE_ACCOUNT_JSON="$(cat path/to/service-account.json)" \
+  DATABASE_URL="postgres://...neon.tech/..." \
+  COFFEE_WRITE_TOKEN="..." \
   --app samhsteinmetz-vitals-api
-# DATABASE_URL and PORT are set by the platform automatically.
+# PORT is set by the platform automatically.
 # (On Render, set the same keys under the service's Environment tab.)
 ```
 

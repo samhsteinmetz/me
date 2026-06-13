@@ -8,7 +8,6 @@
 // accent #2C4A6E, muted #6B6860.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useVitalsData } from "../hooks/useVitalsData";
 import {
   computeResponseCurve,
@@ -38,7 +37,6 @@ export default function VitalsPanel() {
   const panelRef = useRef<HTMLElement>(null);
   const tabRef = useRef<HTMLButtonElement>(null);
 
-  const { user, loading: authLoading, configured, signIn, signOut } = useAuth();
   const {
     hrData,
     vixData,
@@ -48,7 +46,6 @@ export default function VitalsPanel() {
     hrError,
     hrAuthError,
     coffeeError,
-    refetch,
   } = useVitalsData();
 
   // Escape to close; restore focus to the tab.
@@ -72,11 +69,6 @@ export default function VitalsPanel() {
     () => computeResponseCurve(coffeeData, intradayByDate),
     [coffeeData, intradayByDate]
   );
-
-  const firstName =
-    user?.displayName?.split(" ")[0] ||
-    user?.email?.split("@")[0] ||
-    "you";
 
   return (
     <>
@@ -158,33 +150,6 @@ export default function VitalsPanel() {
             vitals
           </span>
           <div className="flex items-center gap-3">
-            {!authLoading && configured && (
-              <>
-                {user ? (
-                  <span style={{ fontSize: 12, color: MUTED }}>
-                    {firstName}{" "}
-                    <span aria-hidden="true">·</span>{" "}
-                    <button
-                      type="button"
-                      onClick={() => signOut()}
-                      className="underline underline-offset-2 hover:opacity-70"
-                      style={{ color: MUTED }}
-                    >
-                      sign out
-                    </button>
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => signIn().catch(() => {})}
-                    style={{ fontSize: 12, color: MUTED }}
-                    className="underline underline-offset-2 hover:opacity-70"
-                  >
-                    sign in
-                  </button>
-                )}
-              </>
-            )}
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -251,8 +216,6 @@ export default function VitalsPanel() {
               coffeeData={coffeeData}
               response={response}
               coffeeError={coffeeError}
-              user={user}
-              refetch={refetch}
             />
           )}
 

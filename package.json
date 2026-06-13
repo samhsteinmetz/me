@@ -15,7 +15,6 @@
     "@heroicons/react": "^2.2.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
-    "firebase": "^12.14.0",
     "framer-motion": "^11.13.5",
     "i": "^0.3.7",
     "react": "^18.3.1",

@@ -19,14 +19,11 @@ Create `.env.local` in the repo root (see `.env.example`):
 
 | Variable                     | Purpose                                             |
 | ---------------------------- | --------------------------------------------------- |
-| `VITE_API_URL`               | Backend base URL (your Heroku app URL in prod)      |
-| `VITE_FIREBASE_API_KEY`      | Firebase web config — API key                       |
-| `VITE_FIREBASE_AUTH_DOMAIN`  | Firebase web config — auth domain                   |
-| `VITE_FIREBASE_PROJECT_ID`   | Firebase web config — project id                    |
-| `VITE_FIREBASE_APP_ID`       | Firebase web config — app id                        |
+| `VITE_API_URL`               | Backend base URL (your Render app URL in prod)      |
 
 No secrets/tokens belong in the frontend. The only backend coordinate the
 client knows is `VITE_API_URL`; everything sensitive stays server-side.
+`.env.production` already sets this to the deployed backend for `npm run build`.
 
 ## 2. Backend env vars (set in Heroku config vars)
 
@@ -38,19 +35,26 @@ client knows is `VITE_API_URL`; everything sensitive stays server-side.
 | `GOOGLE_HEALTH_REFRESH_TOKEN`   | durable refresh token (from `/auth/google`)       |
 | `GOOGLE_HEALTH_ACCESS_TOKEN`    | optional initial access token (auto-refreshes)    |
 | `GOOGLE_HEALTH_REDIRECT_URI`    | must match the URI registered in Cloud Console    |
-| `FIREBASE_SERVICE_ACCOUNT_JSON` | full service-account JSON as one string          |
+| `DATABASE_URL`                  | managed Postgres (Neon/Supabase) connection string|
+| `COFFEE_WRITE_TOKEN`            | secret required to POST coffee logs (keep private)|
 | `ALLOWED_ORIGIN`                | allowed origins, comma-separated (no wildcard)   |
-| `ALLOWED_EMAILS`                | optional allowlist for who may log coffee        |
 | `PORT`                          | set automatically by the host                    |
 
-## 3. Firebase setup
+## 3. Coffee log storage + write token
 
-1. Create a Firebase project; enable **Authentication → Google** provider.
-2. Add a **Web app** → copy the config into the `VITE_FIREBASE_*` vars above.
-3. **Project Settings → Service accounts → Generate new private key** → paste
-   the whole JSON into `FIREBASE_SERVICE_ACCOUNT_JSON` on Heroku.
-4. Add your GitHub Pages domain under **Authentication → Settings → Authorized
-   domains** so `signInWithPopup` works in production.
+1. Create a free Postgres database (e.g. [Neon](https://neon.tech) or
+   [Supabase](https://supabase.com)) and copy its connection string into
+   `DATABASE_URL`.
+2. Run the schema once: `psql "$DATABASE_URL" -f server/schema.sql`.
+3. Generate a write token and set it as `COFFEE_WRITE_TOKEN`:
+   `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+4. Log a cup from anywhere (never from the public site):
+   ```bash
+   curl -X POST "$VITE_API_URL/api/coffee" \
+     -H "Authorization: Bearer $COFFEE_WRITE_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"timestamp":"'"$(date -u +%FT%TZ)"'","notes":"latte"}'
+   ```
 
 ## 4. Google Health API setup
 
@@ -90,8 +94,8 @@ git subtree push --prefix server heroku main
 
 - [ ] `VITE_API_URL` points at the deployed backend
 - [ ] `ALLOWED_ORIGIN` on the backend includes the GitHub Pages origin
-- [ ] Firebase Google provider enabled + GitHub Pages domain authorized
-- [ ] Google Health + Firebase service-account vars set on the backend
-- [ ] `/auth/google` run once and refresh token saved to env
-- [ ] `server/schema.sql` applied to the database
+- [ ] Google Health vars set on the backend; `/auth/google` run once and refresh
+      token saved to env
+- [ ] `DATABASE_URL` (Neon/Supabase) set and `server/schema.sql` applied
+- [ ] `COFFEE_WRITE_TOKEN` set on the backend, kept off the frontend
 - [ ] No secrets in the frontend build (`dist/`) — only `VITE_*` public values

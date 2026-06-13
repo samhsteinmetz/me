@@ -48,20 +48,5 @@ export const fetchCoffee = () => getJson<CoffeeEntry[]>("/api/coffee");
 export const fetchIntraday = (date: string) =>
   getJson<IntradayPoint[]>(`/api/hr-intraday?date=${encodeURIComponent(date)}`);
 
-export async function postCoffee(
-  idToken: string,
-  body: { timestamp: string; notes: string | null }
-): Promise<{ success: boolean; entry: CoffeeEntry }> {
-  const res = await fetch(`${API_BASE}/api/coffee`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    throw new ApiError(`POST /api/coffee failed: ${res.status}`, res.status);
-  }
-  return res.json();
-}
+// Note: coffee entries are written privately via the backend's token-protected
+// POST /api/coffee (curl / iOS Shortcut), so no write helper ships here.

@@ -9,9 +9,9 @@
 //     created_at TIMESTAMPTZ DEFAULT NOW()
 //   );
 //
-// The pool reads its connection string from DATABASE_URL (Heroku sets this
-// automatically when you attach the Heroku Postgres add-on). SSL is enabled
-// for managed providers (Heroku) and skipped for plain local Postgres.
+// The pool reads its connection string from DATABASE_URL. SSL is enabled for
+// any remote host (Neon, Supabase, Render, Heroku, etc.) and skipped only for
+// plain local Postgres.
 
 import pg from "pg";
 
@@ -26,15 +26,15 @@ export function getPool() {
   if (pool) return pool;
   if (!process.env.DATABASE_URL) return null;
 
-  const isManaged =
-    /amazonaws\.com|herokuapp|render\.com|\bsslmode=require\b/i.test(
-      process.env.DATABASE_URL
-    );
+  // Managed Postgres (Neon/Supabase/Render/Heroku) requires SSL; local doesn't.
+  const isLocal = /@(localhost|127\.0\.0\.1|\[::1\])(:|\/)/i.test(
+    process.env.DATABASE_URL
+  );
 
   pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    // Heroku Postgres uses self-signed certs; relax verification there only.
-    ssl: isManaged ? { rejectUnauthorized: false } : undefined,
+    // Managed providers use self-signed certs; relax verification for them.
+    ssl: isLocal ? undefined : { rejectUnauthorized: false },
   });
 
   return pool;
