@@ -24,7 +24,7 @@ const Home = () => {
         </h1>
         <p className="mt-5 text-ink-soft text-balance max-w-measure">
           Computer science and finance at Northeastern University, graduating
-          2026.
+          7.
         </p>
       </section>
 
@@ -58,8 +58,7 @@ const Home = () => {
             Software engineering intern at Ironclad, working on AI.
           </li>
           <li>
-            Reading about Model Context Protocol and what it means for how
-            applications get written.
+            interested in automation, the banjo, and the world cup.
           </li>
         </ul>
       </section>

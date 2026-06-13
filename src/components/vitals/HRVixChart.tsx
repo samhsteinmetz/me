@@ -173,7 +173,7 @@ export default function HRVixChart({
         style={{ fontSize: 13, color: MUTED }}
         className="mt-2 italic"
       >
-        You and the market moved together on {n} of the last 30 days.
+        Me and the market moved together on {n} of the last 30 days.
         {marketSyncSuffix(n)}
       </p>
     </div>

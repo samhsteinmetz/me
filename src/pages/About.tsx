@@ -3,7 +3,7 @@ import currImage from "../assets/cat.jpeg";
 
 const About = () => {
   const longText =
-    "I'm Samuel Heron Steinmetz — Sam to most people. I'm finishing a BS in computer science and finance at Northeastern, graduating in 2026. Right now I'm interning at Ironclad on the AI team. I like software systems whose behavior I can predict, math that has a real answer, and projects you can actually ship.";
+    "I'm Samuel Heron Steinmetz — Sam to most people. I'm finishing a BS in computer science and finance at Northeastern, graduating in 2027. Right now I'm interning at Ironclad on the AI team. I like software systems whose behavior I can predict, math that has a real answer, and projects you can actually ship.";
 
   return (
     <div className="container-prose">

@@ -174,7 +174,7 @@ export default function VitalsPanel() {
               className="font-serif"
               style={{ fontSize: "0.9375rem", color: INK }}
             >
-              Heart rate vs VIX
+              Heart rate vs. Market Volatility
             </h3>
             <div className="mt-3">
               {loading ? (

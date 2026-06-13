@@ -60,7 +60,7 @@ export function marketSyncCount(merged: MergedPoint[]): number {
 /** Suffix appended to the correlation sentence per the brief's thresholds. */
 export function marketSyncSuffix(n: number): string {
   if (n > 20) return " Stressed in sync.";
-  if (n < 10) return " You're doing your own thing.";
+  if (n < 10) return " right now not much of a correlation";
   return "";
 }
 
