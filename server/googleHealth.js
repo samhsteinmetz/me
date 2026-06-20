@@ -72,7 +72,10 @@ async function refreshAccessToken() {
     }),
   });
   if (!res.ok) {
-    throw new Error(`Google token refresh failed: ${res.status}`);
+    // Surface Google's error body (e.g. {"error":"invalid_grant"}) so the cause
+    // is diagnosable from logs instead of just a bare status code.
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Google token refresh failed: ${res.status} ${detail}`);
   }
   const data = await res.json();
   accessToken = data.access_token;
