@@ -36,7 +36,12 @@ router.get("/auth/google/callback", async (req, res) => {
   }
 
   try {
-    const tokens = await exchangeCodeForTokens(code, redirectUri(req));
+    // Log the exact redirect_uri sent to Google — it must byte-for-byte match
+    // both the one used at consent time and one registered in Cloud Console, or
+    // the exchange fails with invalid_grant.
+    const uri = redirectUri(req);
+    console.log("[/auth/google/callback] redirect_uri =", uri);
+    const tokens = await exchangeCodeForTokens(code, uri);
 
     // Log clearly so the values can be copied into Render env vars.
     console.log("\n==== GOOGLE HEALTH TOKENS ====");
@@ -72,7 +77,14 @@ router.get("/auth/google/callback", async (req, res) => {
     `);
   } catch (err) {
     console.error("[/auth/google/callback]", err.message);
-    res.status(502).send(`Token exchange failed: ${err.message}`);
+    res
+      .status(502)
+      .send(
+        `Token exchange failed: ${err.message}\n\n` +
+          `redirect_uri used: ${redirectUri(req)}\n` +
+          `This must exactly match an Authorized redirect URI on your OAuth ` +
+          `client in Google Cloud Console.`
+      );
   }
 });
 
