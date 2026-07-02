@@ -24,7 +24,7 @@ const Home = () => {
         </h1>
         <p className="mt-5 text-ink-soft text-balance max-w-measure">
           Computer science and finance at Northeastern University, graduating
-          7.
+          2027.
         </p>
       </section>
 
